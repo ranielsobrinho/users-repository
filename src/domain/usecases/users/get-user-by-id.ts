@@ -6,5 +6,5 @@ export interface GetUserById {
 }
 
 export namespace GetUserById {
-  export type Result = UserModel
+  export type Result = UserModel | null
 }
