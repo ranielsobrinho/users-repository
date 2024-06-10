@@ -1,5 +1,6 @@
 import { CreateUserRepository } from '@/data/protocols/users/create-user-repository'
 import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-email-repository'
+import { GetUserByIdRepository } from '@/data/protocols/users/get-user-by-id-repository'
 import { ListAllUsersRepository } from '@/data/protocols/users/list-all-users-repository'
 import DatabaseHelper from '@/infra/database/postgres/helpers/postgres-helper'
 
@@ -7,7 +8,8 @@ export class UsersRepository
   implements
     GetUserByEmailRepository,
     CreateUserRepository,
-    ListAllUsersRepository
+    ListAllUsersRepository,
+    GetUserByIdRepository
 {
   async createUser(
     params: CreateUserRepository.Params
@@ -33,5 +35,14 @@ export class UsersRepository
     const client = await DatabaseHelper.getClient()
     const result = await client.query('SELECT * FROM seucarlos.users')
     return result.rows
+  }
+
+  async getById(userId: string): Promise<GetUserByIdRepository.Result> {
+    const client = await DatabaseHelper.getClient()
+    const result = await client.query(
+      'SELECT * FROM seucarlos.users WHERE seucarlos.users.id = $1',
+      [userId]
+    )
+    return result.rows[0] ?? null
   }
 }
