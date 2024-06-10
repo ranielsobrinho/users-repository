@@ -83,4 +83,13 @@ describe('DeleteUserUseCase', () => {
     expect(deleteUserSpy).toHaveBeenCalledOnce()
     expect(deleteUserSpy).toHaveBeenCalledWith('any_id')
   })
+
+  it('Should throw if DeleteUserRepository throws', async () => {
+    const { sut, deleteUserRepositoryStub } = makeSut()
+    vi.spyOn(deleteUserRepositoryStub, 'deleteById').mockRejectedValueOnce(
+      new Error()
+    )
+    const promise = sut.execute('any_id')
+    expect(promise).rejects.toThrow()
+  })
 })
