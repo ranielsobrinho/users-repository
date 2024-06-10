@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
-import { CreateUser } from '../../../domain/usecases/users/create-user'
-import { Either, left, right } from '../../../shared'
+import { CreateUser } from '../../../../domain/usecases/users/create-user'
+import { Either, left, right } from '../../../../shared'
 import { CreateUserController } from './create-user-controller'
-import { HttpRequest } from '../../protocols/http'
-import { badRequest, ok, serverError } from '../../helpers/http-helper'
+import { HttpRequest } from '../../../protocols/http'
+import { badRequest, ok, serverError } from '../../../helpers/http-helper'
 
 class EmailAlreadyInUseError extends Error {
   constructor(email: string) {
