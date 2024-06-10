@@ -41,5 +41,20 @@ describe('UsersRepository', () => {
       })
       expect(userCreated).toBeNull()
     })
+
+    it('Should return user created if email does not exists', async () => {
+      const sut = new InMemoryUsersRepository()
+      const userCreated = await sut.createUser({
+        name: 'any_name',
+        email: 'any_email',
+        phone: 'any_phone'
+      })
+      expect(userCreated).toEqual({
+        id: '1',
+        name: 'any_name',
+        email: 'any_email',
+        phone: 'any_phone'
+      })
+    })
   })
 })
