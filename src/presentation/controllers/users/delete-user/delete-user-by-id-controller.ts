@@ -1,5 +1,10 @@
 import { DeleteUserById } from '@/domain/usecases/users/delete-user-by-id'
-import { noContent, serverError } from '@/presentation/helpers/http-helper'
+import { NotFoundError } from '@/presentation/errors/not-found-error'
+import {
+  noContent,
+  notFound,
+  serverError
+} from '@/presentation/helpers/http-helper'
 import { Controller, HttpRequest, HttpResponse } from '@/presentation/protocols'
 
 export class DeleteUserByIdController implements Controller {
@@ -7,7 +12,10 @@ export class DeleteUserByIdController implements Controller {
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
       const { userId } = httpRequest.body
-      await this.deleteUserByIdUseCase.execute(userId)
+      const response = await this.deleteUserByIdUseCase.execute(userId)
+      if (response.isLeft()) {
+        return notFound(new NotFoundError())
+      }
       return noContent()
     } catch (error) {
       return serverError(error)
