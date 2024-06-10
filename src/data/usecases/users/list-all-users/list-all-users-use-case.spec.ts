@@ -39,4 +39,13 @@ describe('ListAllUsersUseCase', () => {
     await sut.execute()
     expect(listAllSpy).toHaveBeenCalledOnce()
   })
+
+  it('Should throw if ListAllUsersRepository throws', async () => {
+    const { sut, listAllUsersRepositoryStub } = makeSut()
+    vi.spyOn(listAllUsersRepositoryStub, 'listAll').mockRejectedValueOnce(
+      new Error()
+    )
+    const promise = sut.execute()
+    expect(promise).rejects.toThrow(new Error())
+  })
 })
