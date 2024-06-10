@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { Either, left, right } from '../../../shared'
 import { GetUserByEmailRepository } from '../../protocols/users/get-user-by-email-repository'
+import { CreateUserRepository } from '../../protocols/users/create-user-repository'
 import { EmailAlreadyInUseError } from '../../errors/email-already-in-use-error'
 import { CreateUserUseCase } from './add-user-use-case'
 
@@ -19,26 +20,41 @@ const makeUserModel = () => ({
 
 const makeGetUserByEmailRepositoryStub = (): GetUserByEmailRepository => {
   class GetUserByEmailRepositoryStub implements GetUserByEmailRepository {
-    async getByEmail(
-      _email: string
-    ): Promise<Either<Error, GetUserByEmailRepository.Result>> {
-      return right(null)
+    async getByEmail(_email: string): Promise<GetUserByEmailRepository.Result> {
+      return null
     }
   }
   return new GetUserByEmailRepositoryStub()
 }
 
+const makeCreateUserRepositoryStub = (): CreateUserRepository => {
+  class CreateUserRepositoryStub implements CreateUserRepository {
+    async createUser(
+      _params: CreateUserRepository.Params
+    ): Promise<CreateUserRepository.Result> {
+      return makeUserModel()
+    }
+  }
+  return new CreateUserRepositoryStub()
+}
+
 type SutTypes = {
   sut: CreateUserUseCase
   getUserByEmailRepositoryStub: GetUserByEmailRepository
+  createUserRepositoryStub: CreateUserRepository
 }
 
 const makeSut = (): SutTypes => {
   const getUserByEmailRepositoryStub = makeGetUserByEmailRepositoryStub()
-  const sut = new CreateUserUseCase(getUserByEmailRepositoryStub)
+  const createUserRepositoryStub = makeCreateUserRepositoryStub()
+  const sut = new CreateUserUseCase(
+    getUserByEmailRepositoryStub,
+    createUserRepositoryStub
+  )
   return {
     sut,
-    getUserByEmailRepositoryStub
+    getUserByEmailRepositoryStub,
+    createUserRepositoryStub
   }
 }
 
@@ -50,7 +66,7 @@ describe('CreateUserUseCase', () => {
       'getByEmail'
     )
     await sut.execute(makeCreateUserRequest())
-    expect(getUserByEmailSpy).toHaveBeenCalled()
+    expect(getUserByEmailSpy).toHaveBeenCalledOnce()
     expect(getUserByEmailSpy).toHaveBeenCalledWith(
       makeCreateUserRequest().email
     )
@@ -74,5 +90,13 @@ describe('CreateUserUseCase', () => {
     expect(user).toEqual(
       left(new EmailAlreadyInUseError(makeCreateUserRequest().email))
     )
+  })
+
+  it('Should call CreateUserRepository with correct params', async () => {
+    const { sut, createUserRepositoryStub } = makeSut()
+    const createUserSpy = vi.spyOn(createUserRepositoryStub, 'createUser')
+    await sut.execute(makeCreateUserRequest())
+    expect(createUserSpy).toHaveBeenCalledOnce()
+    expect(createUserSpy).toHaveBeenCalledWith(makeCreateUserRequest())
   })
 })
