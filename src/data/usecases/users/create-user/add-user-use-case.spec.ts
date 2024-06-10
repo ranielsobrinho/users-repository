@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
-import { left, right } from '../../../shared'
-import { GetUserByEmailRepository } from '../../protocols/users/get-user-by-email-repository'
-import { CreateUserRepository } from '../../protocols/users/create-user-repository'
-import { EmailAlreadyInUseError, RequiredFieldError } from '../../errors'
+import { left, right } from '../../../../shared'
+import { GetUserByEmailRepository } from '../../../protocols/users/get-user-by-email-repository'
+import { CreateUserRepository } from '../../../protocols/users/create-user-repository'
+import { EmailAlreadyInUseError, RequiredFieldError } from '../../../errors'
 import { CreateUserUseCase } from './add-user-use-case'
 
 const makeCreateUserRequest = () => ({
