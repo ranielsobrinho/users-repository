@@ -1,9 +1,13 @@
 import { CreateUserRepository } from '@/data/protocols/users/create-user-repository'
 import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-email-repository'
+import { ListAllUsersRepository } from '@/data/protocols/users/list-all-users-repository'
 import DatabaseHelper from '@/infra/database/postgres/helpers/postgres-helper'
 
 export class UsersRepository
-  implements GetUserByEmailRepository, CreateUserRepository
+  implements
+    GetUserByEmailRepository,
+    CreateUserRepository,
+    ListAllUsersRepository
 {
   async createUser(
     params: CreateUserRepository.Params
@@ -23,5 +27,11 @@ export class UsersRepository
       [email]
     )
     return result.rows[0] ?? null
+  }
+
+  async listAll(): Promise<ListAllUsersRepository.Result> {
+    const client = await DatabaseHelper.getClient()
+    const result = await client.query('SELECT * FROM seucarlos.users')
+    return result.rows[0]
   }
 }

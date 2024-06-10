@@ -1,9 +1,13 @@
 import { CreateUserRepository } from '@/data/protocols/users/create-user-repository'
 import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-email-repository'
+import { ListAllUsersRepository } from '@/data/protocols/users/list-all-users-repository'
 import { UserModel } from '@/domain/models/user-model'
 
 export class InMemoryUsersRepository
-  implements CreateUserRepository, GetUserByEmailRepository
+  implements
+    CreateUserRepository,
+    GetUserByEmailRepository,
+    ListAllUsersRepository
 {
   private repository: UserModel[] = []
 
@@ -27,5 +31,9 @@ export class InMemoryUsersRepository
   async getByEmail(email: string): Promise<GetUserByEmailRepository.Result> {
     const found = this.repository.find((user) => user.email === email)
     return found || null
+  }
+
+  async listAll(): Promise<ListAllUsersRepository.Result> {
+    return this.repository
   }
 }
