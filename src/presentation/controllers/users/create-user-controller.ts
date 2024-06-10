@@ -1,11 +1,7 @@
 import { Controller } from '@/presentation/protocols/controller'
 import { HttpRequest, HttpResponse } from '@/presentation/protocols'
 import { CreateUser } from '@/domain/usecases/users/create-user'
-import {
-  badRequest,
-  noContent,
-  serverError
-} from '@/presentation/helpers/http-helper'
+import { badRequest, ok, serverError } from '@/presentation/helpers/http-helper'
 
 export class CreateUserController implements Controller {
   constructor(private readonly createUserUseCase: CreateUser) {}
@@ -21,7 +17,7 @@ export class CreateUserController implements Controller {
       if (response.isLeft()) {
         return badRequest(response.value)
       }
-      return noContent()
+      return ok(response.value)
     } catch (error) {
       return serverError(error as unknown as Error)
     }
