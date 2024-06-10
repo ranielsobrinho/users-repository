@@ -12,6 +12,6 @@ export class GetUserByIdUseCase implements GetUserById {
     if (!user) {
       return left(new NotFoundError())
     }
-    return right(null)
+    return right(user)
   }
 }
