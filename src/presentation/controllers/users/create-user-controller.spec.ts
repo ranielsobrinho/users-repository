@@ -3,7 +3,7 @@ import { CreateUser } from '../../../domain/usecases/users/create-user'
 import { Either, left, right } from '../../../shared'
 import { CreateUserController } from './create-user-controller'
 import { HttpRequest } from '../../protocols/http'
-import { badRequest, serverError } from '../../helpers/http-helper'
+import { badRequest, ok, serverError } from '../../helpers/http-helper'
 
 class EmailAlreadyInUseError extends Error {
   constructor(email: string) {
@@ -76,5 +76,11 @@ describe('CreateUserController', () => {
     expect(httpResponse).toEqual(
       badRequest(new EmailAlreadyInUseError(makeCreateUserRequest().body.email))
     )
+  })
+
+  it('Should return 200 on success', async () => {
+    const { sut } = makeSut()
+    const httpResponse = await sut.handle(makeCreateUserRequest())
+    expect(httpResponse).toEqual(ok({ id: 'any_id' }))
   })
 })
