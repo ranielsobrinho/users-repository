@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { left, right } from '../../../shared'
 import { GetUserByEmailRepository } from '../../protocols/users/get-user-by-email-repository'
 import { CreateUserRepository } from '../../protocols/users/create-user-repository'
-import { EmailAlreadyInUseError } from '../../errors/email-already-in-use-error'
+import { EmailAlreadyInUseError, RequiredFieldError } from '../../errors'
 import { CreateUserUseCase } from './add-user-use-case'
 
 const makeCreateUserRequest = () => ({
@@ -59,6 +59,16 @@ const makeSut = (): SutTypes => {
 }
 
 describe('CreateUserUseCase', () => {
+  it('Should returns left error if CreateUserUseCase received null params', async () => {
+    const { sut } = makeSut()
+    const user = await sut.execute({
+      name: 'any_name',
+      email: 'any_email',
+      phone: undefined
+    })
+    expect(user).toEqual(left(new RequiredFieldError('phone')))
+  })
+
   it('Should call GetUserByEmailRepository with correct param', async () => {
     const { sut, getUserByEmailRepositoryStub } = makeSut()
     const getUserByEmailSpy = vi.spyOn(
