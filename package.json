@@ -1,0 +1,27 @@
+{
+  "name": "users-service-api",
+  "version": "0.0.0",
+  "description": "Users api with Express, TypeORM and JWT",
+  "main": "server.ts",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "SOLID",
+    "Express",
+    "Node",
+    "Clean",
+    "Architecture"
+  ],
+  "author": "Raniel Sobrinho",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "dependencies": {
+    "rimraf": "^5.0.5"
+  }
+}
