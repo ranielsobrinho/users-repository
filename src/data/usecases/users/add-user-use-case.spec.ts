@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { Either, left, right } from '../../../shared'
+import { left, right } from '../../../shared'
 import { GetUserByEmailRepository } from '../../protocols/users/get-user-by-email-repository'
 import { CreateUserRepository } from '../../protocols/users/create-user-repository'
 import { EmailAlreadyInUseError } from '../../errors/email-already-in-use-error'
@@ -98,5 +98,11 @@ describe('CreateUserUseCase', () => {
     await sut.execute(makeCreateUserRequest())
     expect(createUserSpy).toHaveBeenCalledOnce()
     expect(createUserSpy).toHaveBeenCalledWith(makeCreateUserRequest())
+  })
+
+  it('Should return user data on success', async () => {
+    const { sut } = makeSut()
+    const userData = await sut.execute(makeCreateUserRequest())
+    expect(userData).toEqual(right(makeUserModel()))
   })
 })
