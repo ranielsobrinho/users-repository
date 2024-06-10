@@ -2,7 +2,7 @@ import { describe, vi, expect, it } from 'vitest'
 import { ListAllUsers } from '../../../../domain/usecases/users/list-all-users'
 import { Either, right } from '../../../../shared'
 import { ListAllUsersController } from './list-all-users-controller'
-import { noContent, serverError } from '../../../helpers/http-helper'
+import { noContent, ok, serverError } from '../../../helpers/http-helper'
 
 const makeListAllUsersResult = () => {
   return [
@@ -62,5 +62,11 @@ describe('ListAllUsersController', () => {
     )
     const httpResponse = await sut.handle({})
     expect(httpResponse).toEqual(noContent())
+  })
+
+  it('Should return 200 if ListAllUsersUseCase returns empty', async () => {
+    const { sut } = makeSut()
+    const httpResponse = await sut.handle({})
+    expect(httpResponse).toEqual(ok(makeListAllUsersResult()))
   })
 })
