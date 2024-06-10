@@ -3,7 +3,7 @@ import { GetUserByIdRepository } from '../../../protocols/users/get-user-by-id-r
 import { GetUserByIdUseCase } from './get-user-by-id-use-case'
 import { UserModel } from '../../../../domain/models/user-model'
 import { NotFoundError } from '../../../errors'
-import { left } from '../../../../shared'
+import { left, right } from '../../../../shared'
 
 const makeUserModel = (): UserModel => ({
   id: 'any_id',
@@ -58,5 +58,11 @@ describe('GetUserByIdUseCase', () => {
     vi.spyOn(getUserByIdRepositoryStub, 'getById').mockResolvedValueOnce(null)
     const result = await sut.execute('any_id')
     expect(result).toEqual(left(new NotFoundError()))
+  })
+
+  it('Should return user on success', async () => {
+    const { sut } = makeSut()
+    const result = await sut.execute('any_id')
+    expect(result).toEqual(right(makeUserModel()))
   })
 })
