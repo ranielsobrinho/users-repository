@@ -1,4 +1,4 @@
-import 'module-alias/register'
+import './config/module-alias'
 require('dotenv').config()
 import DatabaseHelper from '../infra/database/postgres/helpers/postgres-helper'
 
