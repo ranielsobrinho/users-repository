@@ -32,6 +32,6 @@ export class UsersRepository
   async listAll(): Promise<ListAllUsersRepository.Result> {
     const client = await DatabaseHelper.getClient()
     const result = await client.query('SELECT * FROM seucarlos.users')
-    return result.rows[0]
+    return result.rows
   }
 }
