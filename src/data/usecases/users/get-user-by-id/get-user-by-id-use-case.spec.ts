@@ -41,4 +41,13 @@ describe('GetUserByIdUseCase', () => {
     expect(getUserSpy).toHaveBeenCalledOnce()
     expect(getUserSpy).toHaveBeenCalledWith('any_id')
   })
+
+  it('Should throw if GetUserByIdRepository throws', async () => {
+    const { sut, getUserByIdRepositoryStub } = makeSut()
+    vi.spyOn(getUserByIdRepositoryStub, 'getById').mockRejectedValueOnce(
+      new Error()
+    )
+    const result = sut.execute('any_id')
+    expect(result).rejects.toThrow(new Error())
+  })
 })
