@@ -1,3 +1,4 @@
+import { UserModel } from '@/domain/models/user-model'
 import { Either } from '@/shared'
 
 export interface DeleteUserById {
@@ -5,5 +6,5 @@ export interface DeleteUserById {
 }
 
 export namespace DeleteUserById {
-  export type Result = void
+  export type Result = UserModel
 }
