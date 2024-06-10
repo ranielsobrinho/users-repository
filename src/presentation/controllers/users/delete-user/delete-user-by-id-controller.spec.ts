@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { DeleteUserById } from '../../../../domain/usecases/users/delete-user-by-id'
 import { Either, left, right } from '../../../../shared'
 import { NotFoundError } from '../../../errors/not-found-error'
-import { serverError, notFound } from '../../../helpers/http-helper'
+import { serverError, notFound, noContent } from '../../../helpers/http-helper'
 import { HttpRequest } from '../../../protocols/http'
 import { DeleteUserByIdController } from './delete-user-by-id-controller'
 
@@ -65,5 +65,11 @@ describe('DeleteUserByIdController', () => {
     )
     const httpResponse = await sut.handle(makeHttpRequest())
     expect(httpResponse).toEqual(notFound(new NotFoundError()))
+  })
+
+  it('Should return 204 on success', async () => {
+    const { sut } = makeSut()
+    const httpResponse = await sut.handle(makeHttpRequest())
+    expect(httpResponse).toEqual(noContent())
   })
 })
