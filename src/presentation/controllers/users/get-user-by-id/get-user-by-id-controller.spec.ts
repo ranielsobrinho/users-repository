@@ -3,7 +3,7 @@ import { GetUserById } from '../../../../domain/usecases/users/get-user-by-id'
 import { Either, left, right } from '../../../../shared'
 import { GetUserByIdController } from './get-user-by-id-controller'
 import { UserModel } from '../../../../domain/models/user-model'
-import { notFound, serverError } from '../../../helpers/http-helper'
+import { notFound, ok, serverError } from '../../../helpers/http-helper'
 import { NotFoundError } from '../../../errors/not-found-error'
 
 const makeUserModel = (): UserModel => ({
@@ -67,5 +67,11 @@ describe('GetUserByIdController', () => {
     )
     const httpResponse = await sut.handle(makeGetUserRequest())
     expect(httpResponse).toEqual(notFound(new NotFoundError()))
+  })
+
+  it('Should return 200 on success', async () => {
+    const { sut } = makeSut()
+    const httpResponse = await sut.handle(makeGetUserRequest())
+    expect(httpResponse).toEqual(ok(makeUserModel()))
   })
 })
