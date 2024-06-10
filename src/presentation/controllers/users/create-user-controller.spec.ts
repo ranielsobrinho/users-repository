@@ -1,9 +1,16 @@
 import { describe, expect, it, vi } from 'vitest'
 import { CreateUser } from '../../../domain/usecases/users/create-user'
-import { Either, right } from '../../../shared'
+import { Either, left, right } from '../../../shared'
 import { CreateUserController } from './create-user-controller'
 import { HttpRequest } from '../../protocols/http'
-import { serverError } from '../../helpers/http-helper'
+import { badRequest, serverError } from '../../helpers/http-helper'
+
+class EmailAlreadyInUseError extends Error {
+  constructor(email: string) {
+    super(`Email ${email} already in use.`)
+    this.name = 'EmailAlreadyInUseError'
+  }
+}
 
 const makeCreateUserUseCaseStub = (): CreateUser => {
   class CreateUserUseCaseStub implements CreateUser {
@@ -58,5 +65,16 @@ describe('CreateUserController', () => {
     )
     const httpResponse = await sut.handle(makeCreateUserRequest())
     expect(httpResponse).toEqual(serverError(new Error()))
+  })
+
+  it('Should return 400 if CreateUser returns a EmailAlreadyInUse error', async () => {
+    const { sut, createUserUseCaseStub } = makeSut()
+    vi.spyOn(createUserUseCaseStub, 'execute').mockResolvedValueOnce(
+      left(new EmailAlreadyInUseError(makeCreateUserRequest().body.email))
+    )
+    const httpResponse = await sut.handle(makeCreateUserRequest())
+    expect(httpResponse).toEqual(
+      badRequest(new EmailAlreadyInUseError(makeCreateUserRequest().body.email))
+    )
   })
 })
