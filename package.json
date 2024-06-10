@@ -11,6 +11,7 @@
     "test:unit": "npm test -- run -c vitest.unit.config.ts",
     "test:integration": "npm test -- run -c vitest.integration.config.ts",
     "test:watch": "npm test -- --watch",
+    "test:verbose": "vitest --passWithNoTests",
     "test:staged": "npm test -- related",
     "test:coverage": "npm test -- run --coverage",
     "prepare": "husky",
