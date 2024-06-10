@@ -7,5 +7,5 @@ export interface CreateUser {
 
 export namespace CreateUser {
   export type Params = Omit<UserModel, 'id'>
-  export type Result = void
+  export type Result = { id: string }
 }
