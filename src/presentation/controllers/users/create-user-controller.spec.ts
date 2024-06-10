@@ -3,6 +3,7 @@ import { CreateUser } from '../../../domain/usecases/users/create-user'
 import { Either, right } from '../../../shared'
 import { CreateUserController } from './create-user-controller'
 import { HttpRequest } from '../../protocols/http'
+import { serverError } from '../../helpers/http-helper'
 
 const makeCreateUserUseCaseStub = (): CreateUser => {
   class CreateUserUseCaseStub implements CreateUser {
@@ -48,5 +49,14 @@ describe('CreateUserController', () => {
       email: 'any_email',
       phone: 'any_phone'
     })
+  })
+
+  it('Should return 500 if CreateUser throws', async () => {
+    const { sut, createUserUseCaseStub } = makeSut()
+    vi.spyOn(createUserUseCaseStub, 'execute').mockRejectedValueOnce(
+      new Error()
+    )
+    const httpResponse = await sut.handle(makeCreateUserRequest())
+    expect(httpResponse).toEqual(serverError(new Error()))
   })
 })
