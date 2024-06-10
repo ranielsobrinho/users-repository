@@ -8,7 +8,7 @@ export class ListAllUsersUseCase implements ListAllUsers {
   ) {}
 
   async execute(): Promise<Either<Error, ListAllUsers.Result>> {
-    await this.listAllUsersRepository.listAll()
-    return right([])
+    const users = await this.listAllUsersRepository.listAll()
+    return right(users)
   }
 }
