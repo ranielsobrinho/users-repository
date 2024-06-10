@@ -19,7 +19,7 @@ export class CreateUserController implements Controller {
       }
       return ok(response.value)
     } catch (error) {
-      return serverError(error as unknown as Error)
+      return serverError(error)
     }
   }
 }
