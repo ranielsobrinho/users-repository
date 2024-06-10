@@ -109,6 +109,15 @@ describe('CreateUserUseCase', () => {
     )
   })
 
+  it('Should throw if CreateUserRepository throws', async () => {
+    const { sut, createUserRepositoryStub } = makeSut()
+    vi.spyOn(createUserRepositoryStub, 'createUser').mockRejectedValueOnce(
+      new Error()
+    )
+    const promise = sut.execute(makeCreateUserRequest())
+    await expect(promise).rejects.toThrow(new Error())
+  })
+
   it('Should return user data on success', async () => {
     const { sut } = makeSut()
     const userData = await sut.execute(makeCreateUserRequest())
