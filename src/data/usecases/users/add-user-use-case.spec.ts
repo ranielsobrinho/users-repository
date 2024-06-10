@@ -84,7 +84,7 @@ describe('CreateUserUseCase', () => {
   it('Should returns left error if GetUserByEmailRepository returns a user', async () => {
     const { sut, getUserByEmailRepositoryStub } = makeSut()
     vi.spyOn(getUserByEmailRepositoryStub, 'getByEmail').mockResolvedValueOnce(
-      right(makeUserModel())
+      makeUserModel()
     )
     const user = await sut.execute(makeCreateUserRequest())
     expect(user).toEqual(
@@ -98,6 +98,15 @@ describe('CreateUserUseCase', () => {
     await sut.execute(makeCreateUserRequest())
     expect(createUserSpy).toHaveBeenCalledOnce()
     expect(createUserSpy).toHaveBeenCalledWith(makeCreateUserRequest())
+  })
+
+  it('Should return error if CreateUserRepository returns null', async () => {
+    const { sut, createUserRepositoryStub } = makeSut()
+    vi.spyOn(createUserRepositoryStub, 'createUser').mockResolvedValueOnce(null)
+    const userData = await sut.execute(makeCreateUserRequest())
+    expect(userData).toEqual(
+      left(new EmailAlreadyInUseError(makeCreateUserRequest().email))
+    )
   })
 
   it('Should return user data on success', async () => {
