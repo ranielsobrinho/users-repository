@@ -1,4 +1,5 @@
 import { CreateUserRepository } from '@/data/protocols/users/create-user-repository'
+import { DeleteUserRepository } from '@/data/protocols/users/delete-user-repository'
 import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-email-repository'
 import { GetUserByIdRepository } from '@/data/protocols/users/get-user-by-id-repository'
 import { ListAllUsersRepository } from '@/data/protocols/users/list-all-users-repository'
@@ -9,7 +10,8 @@ export class InMemoryUsersRepository
     CreateUserRepository,
     GetUserByEmailRepository,
     ListAllUsersRepository,
-    GetUserByIdRepository
+    GetUserByIdRepository,
+    DeleteUserRepository
 {
   private repository: UserModel[] = []
 
@@ -42,5 +44,11 @@ export class InMemoryUsersRepository
   async getById(userId: string): Promise<GetUserByIdRepository.Result> {
     const user = this.repository.find((user) => user.id === userId)
     return user || null
+  }
+
+  async deleteById(userId: string): Promise<DeleteUserRepository.Result> {
+    const deletedUser = this.repository.find((user) => user.id === userId)
+    this.repository = this.repository.filter((user) => user.id !== userId)
+    return deletedUser!
   }
 }

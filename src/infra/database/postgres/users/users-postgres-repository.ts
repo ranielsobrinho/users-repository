@@ -2,14 +2,17 @@ import { CreateUserRepository } from '@/data/protocols/users/create-user-reposit
 import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-email-repository'
 import { GetUserByIdRepository } from '@/data/protocols/users/get-user-by-id-repository'
 import { ListAllUsersRepository } from '@/data/protocols/users/list-all-users-repository'
+import { DeleteUserRepository } from '@/data/protocols/users/delete-user-repository'
 import DatabaseHelper from '@/infra/database/postgres/helpers/postgres-helper'
+import { UserModel } from '@/domain/models/user-model'
 
 export class UsersRepository
   implements
     GetUserByEmailRepository,
     CreateUserRepository,
     ListAllUsersRepository,
-    GetUserByIdRepository
+    GetUserByIdRepository,
+    DeleteUserRepository
 {
   async createUser(
     params: CreateUserRepository.Params
@@ -44,5 +47,14 @@ export class UsersRepository
       [userId]
     )
     return result.rows[0] ?? null
+  }
+
+  async deleteById(userId: string): Promise<DeleteUserRepository.Result> {
+    const client = await DatabaseHelper.getClient()
+    const result = await client.query(
+      'DELETE FROM seucarlos.users WHERE seucarlos.users.id = $1',
+      [userId]
+    )
+    return result.rows[0]
   }
 }
