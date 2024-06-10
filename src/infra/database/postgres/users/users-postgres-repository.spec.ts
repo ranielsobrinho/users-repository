@@ -25,4 +25,21 @@ describe('UsersRepository', () => {
       })
     })
   })
+
+  describe('createUser', () => {
+    it('Should return null if email already exists', async () => {
+      const sut = new InMemoryUsersRepository()
+      await sut.createUser({
+        name: 'any_name',
+        email: 'any_email',
+        phone: 'any_phone'
+      })
+      const userCreated = await sut.createUser({
+        name: 'any_name',
+        email: 'any_email',
+        phone: 'any_phone'
+      })
+      expect(userCreated).toBeNull()
+    })
+  })
 })
