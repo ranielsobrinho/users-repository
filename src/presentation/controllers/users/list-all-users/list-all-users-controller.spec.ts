@@ -2,6 +2,7 @@ import { describe, vi, expect, it } from 'vitest'
 import { ListAllUsers } from '../../../../domain/usecases/users/list-all-users'
 import { Either, right } from '../../../../shared'
 import { ListAllUsersController } from './list-all-users-controller'
+import { serverError } from '../../../helpers/http-helper'
 
 const makeListAllUsersResult = () => {
   return [
@@ -43,5 +44,14 @@ describe('ListAllUsersController', () => {
     const listUsersSpy = vi.spyOn(listAllUsersUseCaseStub, 'execute')
     await sut.handle({})
     expect(listUsersSpy).toHaveBeenCalledOnce()
+  })
+
+  it('Should return 500 if ListAllUsersUseCase throws', async () => {
+    const { sut, listAllUsersUseCaseStub } = makeSut()
+    vi.spyOn(listAllUsersUseCaseStub, 'execute').mockRejectedValueOnce(
+      new Error()
+    )
+    const httpResponse = await sut.handle({})
+    expect(httpResponse).toEqual(serverError(new Error()))
   })
 })
