@@ -1,12 +1,9 @@
 import { UserModel } from '@/domain/models/user-model'
-import { Either } from '@/shared'
 
 export interface GetUserByEmailRepository {
-  getByEmail(
-    email: string
-  ): Promise<Either<Error, GetUserByEmailRepository.Result>>
+  getByEmail(email: string): Promise<GetUserByEmailRepository.Result>
 }
 
 export namespace GetUserByEmailRepository {
-  export type Result = UserModel
+  export type Result = UserModel | null
 }
