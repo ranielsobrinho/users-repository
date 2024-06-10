@@ -1,6 +1,7 @@
 import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-email-repository'
+import { EmailAlreadyInUseError } from '@/data/errors/email-already-in-use-error'
 import { CreateUser } from '@/domain/usecases/users/create-user'
-import { Either, right } from '@/shared'
+import { Either, right, left } from '@/shared'
 
 export class CreateUserUseCase implements CreateUser {
   constructor(
@@ -10,7 +11,10 @@ export class CreateUserUseCase implements CreateUser {
     params: CreateUser.Params
   ): Promise<Either<Error, CreateUser.Result>> {
     const { email } = params
-    await this.getUserByEmailRepository.getByEmail(email)
+    const user = await this.getUserByEmailRepository.getByEmail(email)
+    if (user) {
+      return left(new EmailAlreadyInUseError(email))
+    }
     return right({ id: 'any_id' })
   }
 }
