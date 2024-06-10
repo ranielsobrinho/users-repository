@@ -3,7 +3,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "target": "ES2021",
-    "sourceMap": true,
+    "sourceMap": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "module": "CommonJS",
@@ -16,5 +16,8 @@
     "strict": true
   },
   "include": ["src"],
-  "exclude": ["**/*.spec.ts", "**/*.test.ts"]
+  "exclude": ["**/*.spec.ts", "**/*.test.ts"],
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  }
 }
