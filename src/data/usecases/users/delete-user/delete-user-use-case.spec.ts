@@ -3,7 +3,7 @@ import { GetUserByIdRepository } from '../../../protocols/users/get-user-by-id-r
 import { DeleteUserRepository } from '../../../protocols/users/delete-user-repository'
 import { DeleteUserUseCase } from './delete-user-use-case'
 import { UserModel } from '../../../../domain/models/user-model'
-import { left } from '../../../../shared'
+import { left, right } from '../../../../shared'
 import { NotFoundError } from '../../../errors'
 
 const makeUserModel = (): UserModel => ({
@@ -91,5 +91,11 @@ describe('DeleteUserUseCase', () => {
     )
     const promise = sut.execute('any_id')
     expect(promise).rejects.toThrow()
+  })
+
+  it('Should return deleted user on success', async () => {
+    const { sut } = makeSut()
+    const response = await sut.execute('any_id')
+    expect(response).toEqual(right(makeUserModel()))
   })
 })
