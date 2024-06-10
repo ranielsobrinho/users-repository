@@ -16,12 +16,15 @@
   "author": "Raniel Sobrinho",
   "license": "MIT",
   "devDependencies": {
+    "@types/module-alias": "^2.0.4",
+    "@types/node": "^20.12.7",
     "typescript": "^5.4.5"
   },
   "engines": {
     "node": "18.x"
   },
   "dependencies": {
+    "module-alias": "^2.2.3",
     "rimraf": "^5.0.5"
   }
 }
