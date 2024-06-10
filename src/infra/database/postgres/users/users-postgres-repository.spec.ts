@@ -8,5 +8,21 @@ describe('UsersRepository', () => {
       const user = await sut.getByEmail('any_email')
       expect(user).toBeNull()
     })
+
+    it('Should return user if email is taken', async () => {
+      const sut = new InMemoryUsersRepository()
+      await sut.createUser({
+        name: 'any_name',
+        email: 'any_email',
+        phone: 'any_phone'
+      })
+      const user = await sut.getByEmail('any_email')
+      expect(user).toEqual({
+        id: '1',
+        name: 'any_name',
+        email: 'any_email',
+        phone: 'any_phone'
+      })
+    })
   })
 })
