@@ -17,7 +17,7 @@ export class CreateUserUseCase implements CreateUser {
     if (user) {
       return left(new EmailAlreadyInUseError(email))
     }
-    await this.createUserRepository.createUser(params)
-    return right({ id: 'any_id' })
+    const userCreated = await this.createUserRepository.createUser(params)
+    return right(userCreated)
   }
 }
