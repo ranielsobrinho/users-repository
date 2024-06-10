@@ -1,9 +1,9 @@
-import { Client } from 'pg'
+import { Pool } from 'pg'
 
 const DB_CONNECTION_STRING: string = process.env.DB_CONNECTION_STRING!
 
 class PostgresHelper {
-  private client = new Client({ connectionString: DB_CONNECTION_STRING })
+  private client = new Pool({ connectionString: DB_CONNECTION_STRING })
 
   async connect(): Promise<void> {
     this.client
@@ -12,7 +12,7 @@ class PostgresHelper {
       .catch((err) => console.error('Error when connecting to postgres!', err))
   }
 
-  async getClient(): Promise<Client> {
+  async getClient(): Promise<Pool> {
     await this.client.connect()
     return this.client
   }
