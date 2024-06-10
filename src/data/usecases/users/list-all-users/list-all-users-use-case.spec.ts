@@ -1,18 +1,23 @@
 import { describe, it, vi, expect } from 'vitest'
 import { ListAllUsersRepository } from '../../../protocols/users/list-all-users-repository'
 import { ListAllUsersUseCase } from './list-all-users-use-case'
+import { right } from '../../../../shared/either'
+
+const makeUsersResult = () => {
+  return [
+    {
+      id: 'any_id',
+      name: 'any_name',
+      email: 'any_email@mail.com',
+      phone: '9789743413'
+    }
+  ]
+}
 
 const makeListAllUsersRepositoryStub = (): ListAllUsersRepository => {
   class ListAllUsersRepositoryStub implements ListAllUsersRepository {
     async listAll(): Promise<ListAllUsersRepository.Result> {
-      return [
-        {
-          id: 'any_id',
-          name: 'any_name',
-          email: 'any_email@mail.com',
-          phone: '9789743413'
-        }
-      ]
+      return makeUsersResult()
     }
   }
   return new ListAllUsersRepositoryStub()
@@ -47,5 +52,11 @@ describe('ListAllUsersUseCase', () => {
     )
     const promise = sut.execute()
     expect(promise).rejects.toThrow(new Error())
+  })
+
+  it('Should return users on success', async () => {
+    const { sut } = makeSut()
+    const response = await sut.execute()
+    expect(response).toEqual(right(makeUsersResult()))
   })
 })
