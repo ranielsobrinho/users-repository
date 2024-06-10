@@ -6,7 +6,7 @@ export class GetUserByIdController implements Controller {
   constructor(private readonly getUserByIdUseCase: GetUserById) {}
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
-      const { userId } = httpRequest.body
+      const { userId } = httpRequest.params
 
       const user = await this.getUserByIdUseCase.execute(userId!)
 

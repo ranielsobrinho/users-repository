@@ -5,6 +5,7 @@ import { GetUserByIdController } from './get-user-by-id-controller'
 import { UserModel } from '../../../../domain/models/user-model'
 import { notFound, ok, serverError } from '../../../helpers/http-helper'
 import { NotFoundError } from '../../../errors/not-found-error'
+import { HttpRequest } from '../../../protocols'
 
 const makeUserModel = (): UserModel => ({
   id: 'any_id',
@@ -13,8 +14,8 @@ const makeUserModel = (): UserModel => ({
   phone: 'any_phone'
 })
 
-const makeGetUserRequest = () => ({
-  body: {
+const makeGetUserRequest = (): HttpRequest => ({
+  params: {
     userId: 'any_id'
   }
 })
