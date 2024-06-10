@@ -47,4 +47,13 @@ describe('CreateUserUseCase', () => {
       makeCreateUserRequest().email
     )
   })
+
+  it('Should throw if GetUserByEmailRepository throws', async () => {
+    const { sut, getUserByEmailRepositoryStub } = makeSut()
+    vi.spyOn(getUserByEmailRepositoryStub, 'getByEmail').mockRejectedValueOnce(
+      new Error()
+    )
+    const promise = sut.execute(makeCreateUserRequest())
+    await expect(promise).rejects.toThrow(new Error())
+  })
 })
