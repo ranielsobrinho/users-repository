@@ -1,9 +1,10 @@
 import { describe, it, expect, vi } from 'vitest'
 import { GetUserById } from '../../../../domain/usecases/users/get-user-by-id'
-import { Either, right } from '../../../../shared'
+import { Either, left, right } from '../../../../shared'
 import { GetUserByIdController } from './get-user-by-id-controller'
 import { UserModel } from '../../../../domain/models/user-model'
-import { serverError } from '../../../helpers/http-helper'
+import { notFound, serverError } from '../../../helpers/http-helper'
+import { NotFoundError } from '../../../errors/not-found-error'
 
 const makeUserModel = (): UserModel => ({
   id: 'any_id',
@@ -57,5 +58,14 @@ describe('GetUserByIdController', () => {
     )
     const httpResponse = await sut.handle(makeGetUserRequest())
     expect(httpResponse).toEqual(serverError(new Error()))
+  })
+
+  it('Should return 404 if GetUserByIdUseCase returns null', async () => {
+    const { sut, getUserByIdUseCaseStub } = makeSut()
+    vi.spyOn(getUserByIdUseCaseStub, 'execute').mockResolvedValueOnce(
+      left(new NotFoundError())
+    )
+    const httpResponse = await sut.handle(makeGetUserRequest())
+    expect(httpResponse).toEqual(notFound(new NotFoundError()))
   })
 })
