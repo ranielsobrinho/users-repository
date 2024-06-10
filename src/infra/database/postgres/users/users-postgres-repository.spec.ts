@@ -76,4 +76,17 @@ describe('UsersRepository', () => {
       expect(userData).toEqual(makeCreatedUser())
     })
   })
+
+  describe('deleteById', () => {
+    it('Should delete user by id', async () => {
+      const sut = makeSut()
+      await sut.createUser(makeCreateUserRequest())
+      const users = await sut.listAll()
+      expect(users.length).toBe(1)
+      const deletedUser = await sut.deleteById('1')
+      const usersDelete = await sut.listAll()
+      expect(deletedUser).toEqual(makeCreatedUser())
+      expect(usersDelete.length).toBe(0)
+    })
+  })
 })
