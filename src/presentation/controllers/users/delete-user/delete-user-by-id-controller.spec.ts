@@ -3,6 +3,7 @@ import { Either, right } from '../../../../shared'
 import { describe, it, vi, expect } from 'vitest'
 import { DeleteUserByIdController } from './delete-user-by-id-controller'
 import { HttpRequest } from '../../../protocols/http'
+import { serverError } from '../../../helpers/http-helper'
 
 const makeHttpRequest = (): HttpRequest => ({
   body: { userId: 'any_id' }
@@ -45,5 +46,14 @@ describe('DeleteUserByIdController', () => {
     await sut.handle(makeHttpRequest())
     expect(deleteUserSpy).toHaveBeenCalledOnce()
     expect(deleteUserSpy).toHaveBeenCalledWith('any_id')
+  })
+
+  it('Should return 500 if DeleteUserByIdUseCase throws', async () => {
+    const { sut, deleteUserByIdUseCaseStub } = makeSut()
+    vi.spyOn(deleteUserByIdUseCaseStub, 'execute').mockRejectedValueOnce(
+      new Error()
+    )
+    const httpResponse = await sut.handle(makeHttpRequest())
+    expect(httpResponse).toEqual(serverError(new Error()))
   })
 })
