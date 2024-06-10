@@ -17,13 +17,8 @@ export class DeleteUserUseCase implements DeleteUserById {
       return left(new NotFoundError())
     }
 
-    await this.deleteUserRepository.deleteById(userId)
+    const deletedUser = await this.deleteUserRepository.deleteById(userId)
 
-    return right({
-      id: 'any_id',
-      name: 'any_name',
-      email: 'any_email',
-      phone: 'any_phone'
-    })
+    return right(deletedUser)
   }
 }
