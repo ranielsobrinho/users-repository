@@ -2,10 +2,12 @@ import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-ema
 import { EmailAlreadyInUseError } from '@/data/errors/email-already-in-use-error'
 import { CreateUser } from '@/domain/usecases/users/create-user'
 import { Either, right, left } from '@/shared'
+import { CreateUserRepository } from '@/data/protocols/users/create-user-repository'
 
 export class CreateUserUseCase implements CreateUser {
   constructor(
-    private readonly getUserByEmailRepository: GetUserByEmailRepository
+    private readonly getUserByEmailRepository: GetUserByEmailRepository,
+    private readonly createUserRepository: CreateUserRepository
   ) {}
   async execute(
     params: CreateUser.Params
@@ -15,6 +17,7 @@ export class CreateUserUseCase implements CreateUser {
     if (user) {
       return left(new EmailAlreadyInUseError(email))
     }
+    await this.createUserRepository.createUser(params)
     return right({ id: 'any_id' })
   }
 }
