@@ -7,12 +7,13 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "module": "CommonJS",
-    "moduleResolution": "Node16",
+    "moduleResolution": "Node",
     "esModuleInterop": true,
     "baseUrl": "src",
     "paths": {
       "@/*": ["*"]
-    }
+    },
+    "strict": true
   },
   "include": ["src"]
 }
