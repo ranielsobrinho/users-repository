@@ -1,11 +1,19 @@
 import { describe, it, expect, vi } from 'vitest'
 import { GetUserByIdRepository } from '../../../protocols/users/get-user-by-id-repository'
 import { GetUserByIdUseCase } from './get-user-by-id-use-case'
+import { UserModel } from '../../../../domain/models/user-model'
+
+const makeUserModel = (): UserModel => ({
+  id: 'any_id',
+  name: 'any_name',
+  email: 'any_email',
+  phone: 'any_phone'
+})
 
 const makeGetUserByIdRepositoryStub = (): GetUserByIdRepository => {
   class GetUserByIdRepositoryStub implements GetUserByIdRepository {
     async getById(_userId: string): Promise<GetUserByIdRepository.Result> {
-      return null
+      return makeUserModel()
     }
   }
   return new GetUserByIdRepositoryStub()
