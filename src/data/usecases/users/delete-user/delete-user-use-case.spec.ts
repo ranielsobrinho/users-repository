@@ -1,5 +1,6 @@
 import { describe, vi, expect, it } from 'vitest'
 import { GetUserByIdRepository } from '../../../protocols/users/get-user-by-id-repository'
+import { DeleteUserRepository } from '../../../protocols/users/delete-user-repository'
 import { DeleteUserUseCase } from './delete-user-use-case'
 import { UserModel } from '../../../../domain/models/user-model'
 import { left } from '../../../../shared'
@@ -21,17 +22,32 @@ const makeGetUserByIdRepositoryStub = (): GetUserByIdRepository => {
   return new GetUserByIdRepositoryStub()
 }
 
+const makeDeleteUserRepositoryStub = (): DeleteUserRepository => {
+  class DeleteUserRepositoryStub implements DeleteUserRepository {
+    async deleteById(_userId: string): Promise<DeleteUserRepository.Result> {
+      return makeUserModel()
+    }
+  }
+  return new DeleteUserRepositoryStub()
+}
+
 type SutTypes = {
   sut: DeleteUserUseCase
   getUserByIdRepositoryStub: GetUserByIdRepository
+  deleteUserRepositoryStub: DeleteUserRepository
 }
 
 const makeSut = (): SutTypes => {
   const getUserByIdRepositoryStub = makeGetUserByIdRepositoryStub()
-  const sut = new DeleteUserUseCase(getUserByIdRepositoryStub)
+  const deleteUserRepositoryStub = makeDeleteUserRepositoryStub()
+  const sut = new DeleteUserUseCase(
+    getUserByIdRepositoryStub,
+    deleteUserRepositoryStub
+  )
   return {
     sut,
-    getUserByIdRepositoryStub
+    getUserByIdRepositoryStub,
+    deleteUserRepositoryStub
   }
 }
 
@@ -58,5 +74,13 @@ describe('DeleteUserUseCase', () => {
     vi.spyOn(getUserByIdRepositoryStub, 'getById').mockResolvedValueOnce(null)
     const response = await sut.execute('any_id')
     expect(response).toEqual(left(new NotFoundError()))
+  })
+
+  it('Should call DeleteUserRepository with correct param', async () => {
+    const { sut, deleteUserRepositoryStub } = makeSut()
+    const deleteUserSpy = vi.spyOn(deleteUserRepositoryStub, 'deleteById')
+    await sut.execute('any_id')
+    expect(deleteUserSpy).toHaveBeenCalledOnce()
+    expect(deleteUserSpy).toHaveBeenCalledWith('any_id')
   })
 })
