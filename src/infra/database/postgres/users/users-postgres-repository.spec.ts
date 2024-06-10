@@ -61,4 +61,19 @@ describe('UsersRepository', () => {
       expect(users.length).toBe(1)
     })
   })
+
+  describe('getById', () => {
+    it('Should return null if user does not exists', async () => {
+      const sut = makeSut()
+      const userData = await sut.getById('any_id')
+      expect(userData).toBeNull()
+    })
+
+    it('Should return user data on success', async () => {
+      const sut = makeSut()
+      await sut.createUser(makeCreateUserRequest())
+      const userData = await sut.getById('1')
+      expect(userData).toEqual(makeCreatedUser())
+    })
+  })
 })
