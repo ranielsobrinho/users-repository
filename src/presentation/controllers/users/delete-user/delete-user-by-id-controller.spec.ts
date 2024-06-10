@@ -1,9 +1,10 @@
+import { describe, expect, it, vi } from 'vitest'
 import { DeleteUserById } from '../../../../domain/usecases/users/delete-user-by-id'
-import { Either, right } from '../../../../shared'
-import { describe, it, vi, expect } from 'vitest'
-import { DeleteUserByIdController } from './delete-user-by-id-controller'
+import { Either, left, right } from '../../../../shared'
+import { NotFoundError } from '../../../errors/not-found-error'
+import { serverError, notFound } from '../../../helpers/http-helper'
 import { HttpRequest } from '../../../protocols/http'
-import { serverError } from '../../../helpers/http-helper'
+import { DeleteUserByIdController } from './delete-user-by-id-controller'
 
 const makeHttpRequest = (): HttpRequest => ({
   body: { userId: 'any_id' }
@@ -55,5 +56,14 @@ describe('DeleteUserByIdController', () => {
     )
     const httpResponse = await sut.handle(makeHttpRequest())
     expect(httpResponse).toEqual(serverError(new Error()))
+  })
+
+  it('Should return 404 if DeleteUserByIdUseCase returns null', async () => {
+    const { sut, deleteUserByIdUseCaseStub } = makeSut()
+    vi.spyOn(deleteUserByIdUseCaseStub, 'execute').mockResolvedValueOnce(
+      left(new NotFoundError())
+    )
+    const httpResponse = await sut.handle(makeHttpRequest())
+    expect(httpResponse).toEqual(notFound(new NotFoundError()))
   })
 })
