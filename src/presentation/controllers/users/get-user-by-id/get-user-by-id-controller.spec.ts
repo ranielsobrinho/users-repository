@@ -3,6 +3,7 @@ import { GetUserById } from '../../../../domain/usecases/users/get-user-by-id'
 import { Either, right } from '../../../../shared'
 import { GetUserByIdController } from './get-user-by-id-controller'
 import { UserModel } from '../../../../domain/models/user-model'
+import { serverError } from '../../../helpers/http-helper'
 
 const makeUserModel = (): UserModel => ({
   id: 'any_id',
@@ -47,5 +48,14 @@ describe('GetUserByIdController', () => {
     await sut.handle(makeGetUserRequest())
     expect(getByIdSpy).toHaveBeenCalledOnce()
     expect(getByIdSpy).toHaveBeenCalledWith('any_id')
+  })
+
+  it('Should return 500 if GetUserByIdUseCase throws', async () => {
+    const { sut, getUserByIdUseCaseStub } = makeSut()
+    vi.spyOn(getUserByIdUseCaseStub, 'execute').mockRejectedValueOnce(
+      new Error()
+    )
+    const httpResponse = await sut.handle(makeGetUserRequest())
+    expect(httpResponse).toEqual(serverError(new Error()))
   })
 })
