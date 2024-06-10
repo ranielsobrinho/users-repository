@@ -12,7 +12,9 @@ export class CreateUserUseCase implements CreateUser {
   ) {}
   async execute(
     params: CreateUser.Params
-  ): Promise<Either<Error, CreateUser.Result>> {
+  ): Promise<
+    Either<EmailAlreadyInUseError | RequiredFieldError, CreateUser.Result>
+  > {
     const { email } = params
 
     const validationError = await this.validate(params)
