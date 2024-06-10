@@ -17,6 +17,7 @@ const makeCreatedUser = () => ({
 const makeSut = () => {
   return new InMemoryUsersRepository()
 }
+
 describe('UsersRepository', () => {
   describe('getByEmail', () => {
     it('Should return null if email is not taken', async () => {
@@ -45,6 +46,19 @@ describe('UsersRepository', () => {
       const sut = makeSut()
       const userCreated = await sut.createUser(makeCreateUserRequest())
       expect(userCreated).toEqual(makeCreatedUser())
+    })
+  })
+
+  describe('listAll', () => {
+    it('Should return all users', async () => {
+      const sut = makeSut()
+      await sut.createUser(makeCreateUserRequest())
+      const users = await sut.listAll()
+      expect(users[0].id).toBeTruthy()
+      expect(users[0].name).toEqual('any_name')
+      expect(users[0].email).toEqual('any_email')
+      expect(users[0].phone).toEqual('any_phone')
+      expect(users.length).toBe(1)
     })
   })
 })
