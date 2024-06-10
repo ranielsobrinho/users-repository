@@ -1,9 +1,5 @@
 import { GetUserById } from '@/domain/usecases/users/get-user-by-id'
-import {
-  noContent,
-  notFound,
-  serverError
-} from '@/presentation/helpers/http-helper'
+import { notFound, ok, serverError } from '@/presentation/helpers/http-helper'
 import { Controller, HttpRequest, HttpResponse } from '@/presentation/protocols'
 
 export class GetUserByIdController implements Controller {
@@ -18,7 +14,7 @@ export class GetUserByIdController implements Controller {
         return notFound(user.value)
       }
 
-      return noContent()
+      return ok(user.value)
     } catch (error) {
       return serverError(error)
     }
