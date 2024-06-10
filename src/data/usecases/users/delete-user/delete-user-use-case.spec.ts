@@ -2,6 +2,8 @@ import { describe, vi, expect, it } from 'vitest'
 import { GetUserByIdRepository } from '../../../protocols/users/get-user-by-id-repository'
 import { DeleteUserUseCase } from './delete-user-use-case'
 import { UserModel } from '../../../../domain/models/user-model'
+import { left } from '../../../../shared'
+import { NotFoundError } from '../../../errors'
 
 const makeUserModel = (): UserModel => ({
   id: 'any_id',
@@ -49,5 +51,12 @@ describe('DeleteUserUseCase', () => {
     )
     const promise = sut.execute('any_id')
     expect(promise).rejects.toThrow()
+  })
+
+  it('Should return not found error if GetUserByIdRepository returns null', async () => {
+    const { sut, getUserByIdRepositoryStub } = makeSut()
+    vi.spyOn(getUserByIdRepositoryStub, 'getById').mockResolvedValueOnce(null)
+    const response = await sut.execute('any_id')
+    expect(response).toEqual(left(new NotFoundError()))
   })
 })
