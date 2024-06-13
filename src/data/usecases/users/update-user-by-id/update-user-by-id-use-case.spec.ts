@@ -10,6 +10,12 @@ const makeUserModel = (): UserModel => ({
   phone: 'any_phone'
 })
 
+const makeUpdateUserModel = () => ({
+  name: 'other_name',
+  email: 'other_email',
+  phone: 'other_phone'
+})
+
 const makeGetUserByIdRepositoryStub = (): GetUserByIdRepository => {
   class GetUserByIdRepositoryStub implements GetUserByIdRepository {
     async getById(_userId: string): Promise<GetUserByIdRepository.Result> {
@@ -37,12 +43,17 @@ describe('UpdateUserByIdUseCase', () => {
   it('Should call GetUserByIdRepository with correct param', async () => {
     const { sut, getUserByIdRepositoryStub } = makeSut()
     const getUserByIdSpy = vi.spyOn(getUserByIdRepositoryStub, 'getById')
-    await sut.execute('any_id', {
-      name: 'other_name',
-      email: 'other_email',
-      phone: 'other_phone'
-    })
+    await sut.execute('any_id', makeUpdateUserModel())
     expect(getUserByIdSpy).toHaveBeenCalledOnce()
     expect(getUserByIdSpy).toHaveBeenCalledWith('any_id')
+  })
+
+  it('Should throw if GetUserByIdRepository throws', async () => {
+    const { sut, getUserByIdRepositoryStub } = makeSut()
+    vi.spyOn(getUserByIdRepositoryStub, 'getById').mockRejectedValueOnce(
+      new Error()
+    )
+    const promise = sut.execute('any_id', makeUpdateUserModel())
+    expect(promise).rejects.toThrow(new Error())
   })
 })
