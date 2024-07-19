@@ -4,6 +4,7 @@ import { UpdateUserByIdUseCase } from './update-user-by-id-use-case'
 import { UserModel } from '../../../../domain/models/user-model'
 import { left } from '../../../../shared'
 import { NotFoundError } from '../../../errors'
+import { UpdateUserByIdRepository } from '../../../protocols/users/update-user-by-id-repository'
 
 const makeUserModel = (): UserModel => ({
   id: 'any_id',
@@ -27,17 +28,35 @@ const makeGetUserByIdRepositoryStub = (): GetUserByIdRepository => {
   return new GetUserByIdRepositoryStub()
 }
 
+const makeUpdateUserByIdRepositoryStub = (): UpdateUserByIdRepository => {
+  class UpdateUserByIdRepositoryStub implements UpdateUserByIdRepository {
+    async update(
+      _userId: string,
+      _updateUserData: UpdateUserByIdRepository.Params
+    ): Promise<UpdateUserByIdRepository.Result> {
+      return makeUserModel()
+    }
+  }
+  return new UpdateUserByIdRepositoryStub()
+}
+
 type SutTypes = {
   sut: UpdateUserByIdUseCase
   getUserByIdRepositoryStub: GetUserByIdRepository
+  updateUserByIdRepositoryStub: UpdateUserByIdRepository
 }
 
 const makeSut = (): SutTypes => {
   const getUserByIdRepositoryStub = makeGetUserByIdRepositoryStub()
-  const sut = new UpdateUserByIdUseCase(getUserByIdRepositoryStub)
+  const updateUserByIdRepositoryStub = makeUpdateUserByIdRepositoryStub()
+  const sut = new UpdateUserByIdUseCase(
+    getUserByIdRepositoryStub,
+    updateUserByIdRepositoryStub
+  )
   return {
     sut,
-    getUserByIdRepositoryStub
+    getUserByIdRepositoryStub,
+    updateUserByIdRepositoryStub
   }
 }
 
@@ -64,5 +83,13 @@ describe('UpdateUserByIdUseCase', () => {
     vi.spyOn(getUserByIdRepositoryStub, 'getById').mockResolvedValueOnce(null)
     const getUserByIdSpy = await sut.execute('any_id', makeUpdateUserModel())
     expect(getUserByIdSpy).toEqual(left(new NotFoundError()))
+  })
+
+  it('Should call UpdateUserByIdRepository with correct params', async () => {
+    const { sut, updateUserByIdRepositoryStub } = makeSut()
+    const updateUserSpy = vi.spyOn(updateUserByIdRepositoryStub, 'update')
+    await sut.execute('any_id', makeUpdateUserModel())
+    expect(updateUserSpy).toHaveBeenCalledTimes(1)
+    expect(updateUserSpy).toHaveBeenCalledWith('any_id', makeUpdateUserModel())
   })
 })
