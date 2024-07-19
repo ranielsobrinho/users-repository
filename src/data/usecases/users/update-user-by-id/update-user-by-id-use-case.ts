@@ -1,10 +1,14 @@
 import { NotFoundError } from '@/data/errors'
 import { GetUserByIdRepository } from '@/data/protocols/users/get-user-by-id-repository'
+import { UpdateUserByIdRepository } from '@/data/protocols/users/update-user-by-id-repository'
 import { UpdateUserById } from '@/domain/usecases/users/update-user-by-id'
 import { Either, left, right } from '@/shared'
 
 export class UpdateUserByIdUseCase implements UpdateUserById {
-  constructor(private readonly getUserByIdRepository: GetUserByIdRepository) {}
+  constructor(
+    private readonly getUserByIdRepository: GetUserByIdRepository,
+    private readonly updateUserByIdRepository: UpdateUserByIdRepository
+  ) {}
 
   async execute(
     userId: string,
@@ -15,6 +19,8 @@ export class UpdateUserByIdUseCase implements UpdateUserById {
     if (!user) {
       return left(new NotFoundError())
     }
+
+    await this.updateUserByIdRepository.update(userId, params)
     return right({
       id: 'any_id',
       name: 'any_name',
