@@ -2,7 +2,7 @@ import { describe, it, vi, expect } from 'vitest'
 import { GetUserByIdRepository } from '../../../protocols/users/get-user-by-id-repository'
 import { UpdateUserByIdUseCase } from './update-user-by-id-use-case'
 import { UserModel } from '../../../../domain/models/user-model'
-import { left } from '../../../../shared'
+import { left, right } from '../../../../shared'
 import { NotFoundError } from '../../../errors'
 import { UpdateUserByIdRepository } from '../../../protocols/users/update-user-by-id-repository'
 
@@ -34,7 +34,10 @@ const makeUpdateUserByIdRepositoryStub = (): UpdateUserByIdRepository => {
       _userId: string,
       _updateUserData: UpdateUserByIdRepository.Params
     ): Promise<UpdateUserByIdRepository.Result> {
-      return makeUserModel()
+      return {
+        id: 'any_id',
+        ...makeUpdateUserModel()
+      }
     }
   }
   return new UpdateUserByIdRepositoryStub()
@@ -100,5 +103,11 @@ describe('UpdateUserByIdUseCase', () => {
     )
     const promise = sut.execute('any_id', makeUpdateUserModel())
     expect(promise).rejects.toThrow(new Error())
+  })
+
+  it('Should return updated data on success', async () => {
+    const { sut } = makeSut()
+    const result = await sut.execute('any_id', makeUpdateUserModel())
+    expect(result).toEqual(right({ id: 'any_id', ...makeUpdateUserModel() }))
   })
 })
