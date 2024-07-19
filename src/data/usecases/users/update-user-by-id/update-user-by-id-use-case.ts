@@ -20,12 +20,10 @@ export class UpdateUserByIdUseCase implements UpdateUserById {
       return left(new NotFoundError())
     }
 
-    await this.updateUserByIdRepository.update(userId, params)
-    return right({
-      id: 'any_id',
-      name: 'any_name',
-      email: 'any_email',
-      phone: 'any_phone'
-    })
+    const updatedData = await this.updateUserByIdRepository.update(
+      userId,
+      params
+    )
+    return right(updatedData)
   }
 }
