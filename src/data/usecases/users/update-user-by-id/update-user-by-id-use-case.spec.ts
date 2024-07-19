@@ -92,4 +92,13 @@ describe('UpdateUserByIdUseCase', () => {
     expect(updateUserSpy).toHaveBeenCalledTimes(1)
     expect(updateUserSpy).toHaveBeenCalledWith('any_id', makeUpdateUserModel())
   })
+
+  it('Should throw if UpdateUserByIdRepository throws', async () => {
+    const { sut, updateUserByIdRepositoryStub } = makeSut()
+    vi.spyOn(updateUserByIdRepositoryStub, 'update').mockRejectedValueOnce(
+      new Error()
+    )
+    const promise = sut.execute('any_id', makeUpdateUserModel())
+    expect(promise).rejects.toThrow(new Error())
+  })
 })
