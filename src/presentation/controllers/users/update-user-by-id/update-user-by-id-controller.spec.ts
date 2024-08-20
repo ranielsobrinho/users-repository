@@ -23,18 +23,35 @@ const makeUpdateRequest = (): HttpRequest => ({
   }
 })
 
+const makeUpdateUserUseCaseStub = (): UpdateUserById => {
+  class UpdateUserUseCaseStub implements UpdateUserById {
+    async execute(
+      _userId: string,
+      _params: UpdateUserById.Params
+    ): Promise<Either<Error, UserModel>> {
+      return right(makeUserModel())
+    }
+  }
+  return new UpdateUserUseCaseStub()
+}
+
+type SutTypes = {
+  sut: UpdateUserController
+  updateUserUseCaseStub: UpdateUserById
+}
+
+const makeSut = (): SutTypes => {
+  const updateUserUseCaseStub = makeUpdateUserUseCaseStub()
+  const sut = new UpdateUserController(updateUserUseCaseStub)
+  return {
+    sut,
+    updateUserUseCaseStub
+  }
+}
+
 describe('UpdateUserController', () => {
   it('Should call UpdateUserUseCase with correct params', async () => {
-    class UpdateUserUseCaseStub implements UpdateUserById {
-      async execute(
-        _userId: string,
-        _params: UpdateUserById.Params
-      ): Promise<Either<Error, UserModel>> {
-        return right(makeUserModel())
-      }
-    }
-    const updateUserUseCaseStub = new UpdateUserUseCaseStub()
-    const sut = new UpdateUserController(updateUserUseCaseStub)
+    const { sut, updateUserUseCaseStub } = makeSut()
     const updateUserSpy = vi.spyOn(updateUserUseCaseStub, 'execute')
     await sut.handle(makeUpdateRequest())
     expect(updateUserSpy).toHaveBeenCalledWith(
