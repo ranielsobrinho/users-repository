@@ -5,6 +5,7 @@ import { ListAllUsersRepository } from '@/data/protocols/users/list-all-users-re
 import { DeleteUserRepository } from '@/data/protocols/users/delete-user-repository'
 import DatabaseHelper from '@/infra/database/postgres/helpers/postgres-helper'
 import { UserModel } from '@/domain/models/user-model'
+import { UpdateUserByIdRepository } from '@/data/protocols/users/update-user-by-id-repository'
 
 export class UsersRepository
   implements
@@ -12,7 +13,8 @@ export class UsersRepository
     CreateUserRepository,
     ListAllUsersRepository,
     GetUserByIdRepository,
-    DeleteUserRepository
+    DeleteUserRepository,
+    UpdateUserByIdRepository
 {
   async createUser(
     params: CreateUserRepository.Params
@@ -54,6 +56,18 @@ export class UsersRepository
     const result = await client.query(
       'DELETE FROM seucarlos.users WHERE seucarlos.users.id = $1',
       [userId]
+    )
+    return result.rows[0]
+  }
+
+  async update(
+    userId: string,
+    updateUserData: UpdateUserByIdRepository.Params
+  ): Promise<UpdateUserByIdRepository.Result> {
+    const client = await DatabaseHelper.getClient()
+    const result = await client.query(
+      'UPDATE FROM seucarlos.users SET name = $1, email = $2, phone = $3 WHERE id = $4 RETURNING *',
+      [updateUserData.name, updateUserData.email, updateUserData.phone, userId]
     )
     return result.rows[0]
   }

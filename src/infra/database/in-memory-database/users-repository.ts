@@ -3,6 +3,7 @@ import { DeleteUserRepository } from '@/data/protocols/users/delete-user-reposit
 import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-email-repository'
 import { GetUserByIdRepository } from '@/data/protocols/users/get-user-by-id-repository'
 import { ListAllUsersRepository } from '@/data/protocols/users/list-all-users-repository'
+import { UpdateUserByIdRepository } from '@/data/protocols/users/update-user-by-id-repository'
 import { UserModel } from '@/domain/models/user-model'
 
 export class InMemoryUsersRepository
@@ -11,7 +12,8 @@ export class InMemoryUsersRepository
     GetUserByEmailRepository,
     ListAllUsersRepository,
     GetUserByIdRepository,
-    DeleteUserRepository
+    DeleteUserRepository,
+    UpdateUserByIdRepository
 {
   private repository: UserModel[] = []
 
@@ -50,5 +52,14 @@ export class InMemoryUsersRepository
     const deletedUser = this.repository.find((user) => user.id === userId)
     this.repository = this.repository.filter((user) => user.id !== userId)
     return deletedUser!
+  }
+
+  async update(
+    userId: string,
+    updateUserData: UpdateUserByIdRepository.Params
+  ): Promise<UpdateUserByIdRepository.Result> {
+    const found = this.repository.findIndex((user) => user.id === userId)
+    this.repository[found] = { id: userId, ...updateUserData }
+    return this.repository[found]
   }
 }
