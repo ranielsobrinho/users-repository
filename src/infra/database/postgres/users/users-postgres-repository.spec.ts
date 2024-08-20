@@ -7,6 +7,12 @@ const makeCreateUserRequest = () => ({
   phone: 'any_phone'
 })
 
+const makeUpdateUserRequest = () => ({
+  name: 'other_name',
+  email: 'other_email',
+  phone: 'other_phone'
+})
+
 const makeCreatedUser = () => ({
   id: '1',
   name: 'any_name',
@@ -14,6 +20,12 @@ const makeCreatedUser = () => ({
   phone: 'any_phone'
 })
 
+const makeUpdatedUser = () => ({
+  id: '1',
+  name: 'other_name',
+  email: 'other_email',
+  phone: 'other_phone'
+})
 const makeSut = () => {
   return new InMemoryUsersRepository()
 }
@@ -87,6 +99,20 @@ describe('UsersRepository', () => {
       const usersDelete = await sut.listAll()
       expect(deletedUser).toEqual(makeCreatedUser())
       expect(usersDelete.length).toBe(0)
+    })
+  })
+
+  describe('update', () => {
+    it('Should update user by id', async () => {
+      const sut = makeSut()
+      const users = await sut.listAll()
+      await sut.createUser(makeCreateUserRequest())
+      await sut.update('1', makeUpdateUserRequest())
+      expect(users[0].id).toBeTruthy()
+      expect(users[0].name).toEqual('other_name')
+      expect(users[0].email).toEqual('other_email')
+      expect(users[0].phone).toEqual('other_phone')
+      expect(users.length).toBe(1)
     })
   })
 })
