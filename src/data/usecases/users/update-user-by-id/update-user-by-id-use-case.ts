@@ -1,4 +1,8 @@
-import { NotFoundError, RequiredFieldError } from '@/data/errors'
+import {
+  EmailAlreadyInUseError,
+  NotFoundError,
+  RequiredFieldError
+} from '@/data/errors'
 import { GetUserByIdRepository } from '@/data/protocols/users/get-user-by-id-repository'
 import { UpdateUserByIdRepository } from '@/data/protocols/users/update-user-by-id-repository'
 import { UpdateUserById } from '@/domain/usecases/users/update-user-by-id'
@@ -23,7 +27,12 @@ export class UpdateUserByIdUseCase implements UpdateUserById {
       return left(new NotFoundError())
     }
 
-    await this.getUserByEmailRepository.getByEmail(params.email)
+    const existingUserWithEmail =
+      await this.getUserByEmailRepository.getByEmail(params.email)
+
+    if (existingUserWithEmail) {
+      return left(new EmailAlreadyInUseError(params.email))
+    }
 
     const validationError = await validate(params)
     if (validationError.length) {
