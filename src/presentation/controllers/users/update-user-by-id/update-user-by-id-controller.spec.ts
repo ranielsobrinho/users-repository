@@ -4,7 +4,7 @@ import { Either, left, right } from '../../../../shared'
 import { UserModel } from '../../../../domain/models/user-model'
 import { UpdateUserController } from './update-user-by-id-controller'
 import { HttpRequest } from '../../../protocols/http'
-import { notFound, serverError } from '../../../helpers/http-helper'
+import { notFound, ok, serverError } from '../../../helpers/http-helper'
 import { NotFoundError } from '../../../errors/not-found-error'
 
 const makeUserModel = (): UserModel => ({
@@ -79,5 +79,11 @@ describe('UpdateUserController', () => {
     )
     const response = await sut.handle(makeUpdateRequest())
     expect(response).toEqual(notFound(new NotFoundError()))
+  })
+
+  it('Should return 200 if UpdateUserUseCase on success ', async () => {
+    const { sut } = makeSut()
+    const response = await sut.handle(makeUpdateRequest())
+    expect(response).toEqual(ok(makeUserModel()))
   })
 })
