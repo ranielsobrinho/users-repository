@@ -1,10 +1,11 @@
 import { describe, it, expect, vi } from 'vitest'
 import { UpdateUserById } from '../../../../domain/usecases/users/update-user-by-id'
-import { Either, right } from '../../../../shared'
+import { Either, left, right } from '../../../../shared'
 import { UserModel } from '../../../../domain/models/user-model'
 import { UpdateUserController } from './update-user-by-id-controller'
 import { HttpRequest } from '../../../protocols/http'
-import { serverError } from '../../../helpers/http-helper'
+import { notFound, serverError } from '../../../helpers/http-helper'
+import { NotFoundError } from '../../../errors/not-found-error'
 
 const makeUserModel = (): UserModel => ({
   id: 'any_id',
@@ -69,5 +70,14 @@ describe('UpdateUserController', () => {
     )
     const response = await sut.handle(makeUpdateRequest())
     expect(response).toEqual(serverError(new Error()))
+  })
+
+  it('Should return 404 if UpdateUserUseCase returns NotFoundError', async () => {
+    const { sut, updateUserUseCaseStub } = makeSut()
+    vi.spyOn(updateUserUseCaseStub, 'execute').mockResolvedValueOnce(
+      left(new NotFoundError())
+    )
+    const response = await sut.handle(makeUpdateRequest())
+    expect(response).toEqual(notFound(new NotFoundError()))
   })
 })
