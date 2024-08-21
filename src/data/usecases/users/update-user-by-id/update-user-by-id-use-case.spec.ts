@@ -3,7 +3,7 @@ import { GetUserByIdRepository } from '../../../protocols/users/get-user-by-id-r
 import { UpdateUserByIdUseCase } from './update-user-by-id-use-case'
 import { UserModel } from '../../../../domain/models/user-model'
 import { left, right } from '../../../../shared'
-import { NotFoundError } from '../../../errors'
+import { NotFoundError, RequiredFieldError } from '../../../errors'
 import { UpdateUserByIdRepository } from '../../../protocols/users/update-user-by-id-repository'
 
 const makeUserModel = (): UserModel => ({
@@ -103,6 +103,16 @@ describe('UpdateUserByIdUseCase', () => {
     )
     const promise = sut.execute('any_id', makeUpdateUserModel())
     expect(promise).rejects.toThrow(new Error())
+  })
+
+  it('Should returns left error if UpdateUserByIdRepository received null params', async () => {
+    const { sut } = makeSut()
+    const user = await sut.execute('any_id', {
+      name: 'any_name',
+      email: 'any_email',
+      phone: undefined
+    })
+    expect(user).toEqual(left(new RequiredFieldError('phone')))
   })
 
   it('Should return updated data on success', async () => {
