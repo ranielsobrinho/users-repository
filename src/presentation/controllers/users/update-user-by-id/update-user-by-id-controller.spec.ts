@@ -4,6 +4,7 @@ import { Either, right } from '../../../../shared'
 import { UserModel } from '../../../../domain/models/user-model'
 import { UpdateUserController } from './update-user-by-id-controller'
 import { HttpRequest } from '../../../protocols/http'
+import { serverError } from '../../../helpers/http-helper'
 
 const makeUserModel = (): UserModel => ({
   id: 'any_id',
@@ -59,5 +60,14 @@ describe('UpdateUserController', () => {
       makeUpdateRequest().body
     )
     expect(updateUserSpy).toHaveBeenCalledOnce()
+  })
+
+  it('Should return 500 if UpdateUserUseCase throws', async () => {
+    const { sut, updateUserUseCaseStub } = makeSut()
+    vi.spyOn(updateUserUseCaseStub, 'execute').mockRejectedValueOnce(
+      new Error()
+    )
+    const response = await sut.handle(makeUpdateRequest())
+    expect(response).toEqual(serverError(new Error()))
   })
 })
