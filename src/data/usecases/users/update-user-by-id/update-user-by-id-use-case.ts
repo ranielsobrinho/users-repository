@@ -4,11 +4,13 @@ import { UpdateUserByIdRepository } from '@/data/protocols/users/update-user-by-
 import { UpdateUserById } from '@/domain/usecases/users/update-user-by-id'
 import { Either, left, right } from '@/shared'
 import { validate } from '@/data/utils/validate-params'
+import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-email-repository'
 
 export class UpdateUserByIdUseCase implements UpdateUserById {
   constructor(
     private readonly getUserByIdRepository: GetUserByIdRepository,
-    private readonly updateUserByIdRepository: UpdateUserByIdRepository
+    private readonly updateUserByIdRepository: UpdateUserByIdRepository,
+    private readonly getUserByEmailRepository: GetUserByEmailRepository
   ) {}
 
   async execute(
@@ -20,6 +22,8 @@ export class UpdateUserByIdUseCase implements UpdateUserById {
     if (!user) {
       return left(new NotFoundError())
     }
+
+    await this.getUserByEmailRepository.getByEmail(params.email)
 
     const validationError = await validate(params)
     if (validationError.length) {
