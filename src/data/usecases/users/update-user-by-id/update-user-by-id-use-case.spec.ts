@@ -3,7 +3,11 @@ import { GetUserByIdRepository } from '../../../protocols/users/get-user-by-id-r
 import { UpdateUserByIdUseCase } from './update-user-by-id-use-case'
 import { UserModel } from '../../../../domain/models/user-model'
 import { left, right } from '../../../../shared'
-import { NotFoundError, RequiredFieldError } from '../../../errors'
+import {
+  EmailAlreadyInUseError,
+  NotFoundError,
+  RequiredFieldError
+} from '../../../errors'
 import { UpdateUserByIdRepository } from '../../../protocols/users/update-user-by-id-repository'
 import { GetUserByEmailRepository } from '../../../protocols/users/get-user-by-email-repository'
 
@@ -147,6 +151,17 @@ describe('UpdateUserByIdUseCase', () => {
     )
     const promise = sut.execute('any_id', makeUpdateUserModel())
     await expect(promise).rejects.toThrow(new Error())
+  })
+
+  it('Should returns left error if GetUserByEmailRepository returns a user', async () => {
+    const { sut, getUserByEmailRepositoryStub } = makeSut()
+    vi.spyOn(getUserByEmailRepositoryStub, 'getByEmail').mockResolvedValueOnce(
+      makeUserModel()
+    )
+    const user = await sut.execute('any_id', makeUpdateUserModel())
+    expect(user).toEqual(
+      left(new EmailAlreadyInUseError(makeUpdateUserModel().email))
+    )
   })
 
   it('Should return updated data on success', async () => {
