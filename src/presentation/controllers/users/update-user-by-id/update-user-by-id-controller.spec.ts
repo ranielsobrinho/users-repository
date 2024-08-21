@@ -4,8 +4,13 @@ import { Either, left, right } from '../../../../shared'
 import { UserModel } from '../../../../domain/models/user-model'
 import { UpdateUserController } from './update-user-by-id-controller'
 import { HttpRequest } from '../../../protocols/http'
-import { notFound, ok, serverError } from '../../../helpers/http-helper'
-import { NotFoundError } from '../../../errors/not-found-error'
+import {
+  badRequest,
+  notFound,
+  ok,
+  serverError
+} from '../../../helpers/http-helper'
+import { NotFoundError, RequiredFieldError } from '../../../errors'
 
 const makeUserModel = (): UserModel => ({
   id: 'any_id',
@@ -79,6 +84,24 @@ describe('UpdateUserController', () => {
     )
     const response = await sut.handle(makeUpdateRequest())
     expect(response).toEqual(notFound(new NotFoundError()))
+  })
+
+  it('Should return 400 if UpdateUserUseCase returns param error', async () => {
+    const { sut, updateUserUseCaseStub } = makeSut()
+    vi.spyOn(updateUserUseCaseStub, 'execute').mockResolvedValueOnce(
+      left(new RequiredFieldError('phone'))
+    )
+    const response = await sut.handle({
+      params: {
+        userId: 'any_id'
+      },
+      body: {
+        name: 'any_name',
+        email: 'any_email',
+        phone: undefined
+      }
+    })
+    expect(response).toEqual(badRequest(new RequiredFieldError('phone')))
   })
 
   it('Should return 200 if UpdateUserUseCase on success ', async () => {
