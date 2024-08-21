@@ -5,6 +5,7 @@ import { UserModel } from '../../../../domain/models/user-model'
 import { left, right } from '../../../../shared'
 import { NotFoundError, RequiredFieldError } from '../../../errors'
 import { UpdateUserByIdRepository } from '../../../protocols/users/update-user-by-id-repository'
+import { GetUserByEmailRepository } from '../../../protocols/users/get-user-by-email-repository'
 
 const makeUserModel = (): UserModel => ({
   id: 'any_id',
@@ -43,23 +44,36 @@ const makeUpdateUserByIdRepositoryStub = (): UpdateUserByIdRepository => {
   return new UpdateUserByIdRepositoryStub()
 }
 
+const makeGetUserByEmailRepositoryStub = (): GetUserByEmailRepository => {
+  class GetUserByEmailRepositoryStub implements GetUserByEmailRepository {
+    async getByEmail(_email: string): Promise<GetUserByEmailRepository.Result> {
+      return null
+    }
+  }
+  return new GetUserByEmailRepositoryStub()
+}
+
 type SutTypes = {
   sut: UpdateUserByIdUseCase
   getUserByIdRepositoryStub: GetUserByIdRepository
   updateUserByIdRepositoryStub: UpdateUserByIdRepository
+  getUserByEmailRepositoryStub: GetUserByEmailRepository
 }
 
 const makeSut = (): SutTypes => {
   const getUserByIdRepositoryStub = makeGetUserByIdRepositoryStub()
   const updateUserByIdRepositoryStub = makeUpdateUserByIdRepositoryStub()
+  const getUserByEmailRepositoryStub = makeGetUserByEmailRepositoryStub()
   const sut = new UpdateUserByIdUseCase(
     getUserByIdRepositoryStub,
-    updateUserByIdRepositoryStub
+    updateUserByIdRepositoryStub,
+    getUserByEmailRepositoryStub
   )
   return {
     sut,
     getUserByIdRepositoryStub,
-    updateUserByIdRepositoryStub
+    updateUserByIdRepositoryStub,
+    getUserByEmailRepositoryStub
   }
 }
 
@@ -113,6 +127,17 @@ describe('UpdateUserByIdUseCase', () => {
       phone: undefined
     })
     expect(user).toEqual(left(new RequiredFieldError('phone')))
+  })
+
+  it('Should call GetUserByEmailRepository with correct param', async () => {
+    const { sut, getUserByEmailRepositoryStub } = makeSut()
+    const getUserByEmailSpy = vi.spyOn(
+      getUserByEmailRepositoryStub,
+      'getByEmail'
+    )
+    await sut.execute('any_id', makeUpdateUserModel())
+    expect(getUserByEmailSpy).toHaveBeenCalledOnce()
+    expect(getUserByEmailSpy).toHaveBeenCalledWith(makeUpdateUserModel().email)
   })
 
   it('Should return updated data on success', async () => {
