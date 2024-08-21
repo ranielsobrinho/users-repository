@@ -11,7 +11,7 @@ export class DeleteUserByIdController implements Controller {
   constructor(private readonly deleteUserByIdUseCase: DeleteUserById) {}
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
-      const { userId } = httpRequest.body
+      const { userId } = httpRequest.params
       const response = await this.deleteUserByIdUseCase.execute(userId)
       if (response.isLeft()) {
         return notFound(new NotFoundError())

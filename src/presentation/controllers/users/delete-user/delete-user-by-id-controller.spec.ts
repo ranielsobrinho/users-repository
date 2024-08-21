@@ -7,7 +7,7 @@ import { HttpRequest } from '../../../protocols/http'
 import { DeleteUserByIdController } from './delete-user-by-id-controller'
 
 const makeHttpRequest = (): HttpRequest => ({
-  body: { userId: 'any_id' }
+  params: { userId: 'any_id' }
 })
 
 const makeDeleteUserByIdUseCaseStub = (): DeleteUserById => {
