@@ -1,9 +1,5 @@
 import { UpdateUserById } from '@/domain/usecases/users/update-user-by-id'
-import {
-  noContent,
-  notFound,
-  serverError
-} from '@/presentation/helpers/http-helper'
+import { notFound, ok, serverError } from '@/presentation/helpers/http-helper'
 import { Controller, HttpRequest, HttpResponse } from '@/presentation/protocols'
 
 export class UpdateUserController implements Controller {
@@ -21,7 +17,7 @@ export class UpdateUserController implements Controller {
       if (userOrError.isLeft()) {
         return notFound(userOrError.value)
       }
-      return noContent()
+      return ok(userOrError.value)
     } catch (error) {
       return serverError(error)
     }
