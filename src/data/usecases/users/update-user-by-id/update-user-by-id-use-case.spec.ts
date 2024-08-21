@@ -140,6 +140,15 @@ describe('UpdateUserByIdUseCase', () => {
     expect(getUserByEmailSpy).toHaveBeenCalledWith(makeUpdateUserModel().email)
   })
 
+  it('Should throw if GetUserByEmailRepository throws', async () => {
+    const { sut, getUserByEmailRepositoryStub } = makeSut()
+    vi.spyOn(getUserByEmailRepositoryStub, 'getByEmail').mockRejectedValueOnce(
+      new Error()
+    )
+    const promise = sut.execute('any_id', makeUpdateUserModel())
+    await expect(promise).rejects.toThrow(new Error())
+  })
+
   it('Should return updated data on success', async () => {
     const { sut } = makeSut()
     const result = await sut.execute('any_id', makeUpdateUserModel())
