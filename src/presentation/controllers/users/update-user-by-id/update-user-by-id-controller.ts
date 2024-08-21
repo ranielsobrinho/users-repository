@@ -1,5 +1,10 @@
 import { UpdateUserById } from '@/domain/usecases/users/update-user-by-id'
-import { notFound, ok, serverError } from '@/presentation/helpers/http-helper'
+import {
+  badRequest,
+  notFound,
+  ok,
+  serverError
+} from '@/presentation/helpers/http-helper'
 import { Controller, HttpRequest, HttpResponse } from '@/presentation/protocols'
 
 export class UpdateUserController implements Controller {
@@ -14,8 +19,13 @@ export class UpdateUserController implements Controller {
         phone
       })
 
-      if (userOrError.isLeft()) {
-        return notFound(userOrError.value)
+      if (userOrError.isLeft() && userOrError.value.name === 'NotFoundError') {
+        return notFound(userOrError.value as Error)
+      } else if (
+        userOrError.isLeft() &&
+        userOrError.value.name === 'RequiredFieldError'
+      ) {
+        return badRequest(userOrError.value as Error)
       }
       return ok(userOrError.value)
     } catch (error) {
