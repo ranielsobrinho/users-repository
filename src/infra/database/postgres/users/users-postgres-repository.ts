@@ -4,7 +4,6 @@ import { GetUserByIdRepository } from '@/data/protocols/users/get-user-by-id-rep
 import { ListAllUsersRepository } from '@/data/protocols/users/list-all-users-repository'
 import { DeleteUserRepository } from '@/data/protocols/users/delete-user-repository'
 import DatabaseHelper from '@/infra/database/postgres/helpers/postgres-helper'
-import { UserModel } from '@/domain/models/user-model'
 import { UpdateUserByIdRepository } from '@/data/protocols/users/update-user-by-id-repository'
 
 export class UsersRepository
