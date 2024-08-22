@@ -3,13 +3,8 @@ import { GetUserByIdRepository } from '../../../protocols/users/get-user-by-id-r
 import { UpdateUserByIdUseCase } from './update-user-by-id-use-case'
 import { UserModel } from '../../../../domain/models/user-model'
 import { left, right } from '../../../../shared'
-import {
-  EmailAlreadyInUseError,
-  NotFoundError,
-  RequiredFieldError
-} from '../../../errors'
+import { NotFoundError, RequiredFieldError } from '../../../errors'
 import { UpdateUserByIdRepository } from '../../../protocols/users/update-user-by-id-repository'
-import { GetUserByEmailRepository } from '../../../protocols/users/get-user-by-email-repository'
 
 const makeUserModel = (): UserModel => ({
   id: 'any_id',
@@ -48,36 +43,23 @@ const makeUpdateUserByIdRepositoryStub = (): UpdateUserByIdRepository => {
   return new UpdateUserByIdRepositoryStub()
 }
 
-const makeGetUserByEmailRepositoryStub = (): GetUserByEmailRepository => {
-  class GetUserByEmailRepositoryStub implements GetUserByEmailRepository {
-    async getByEmail(_email: string): Promise<GetUserByEmailRepository.Result> {
-      return null
-    }
-  }
-  return new GetUserByEmailRepositoryStub()
-}
-
 type SutTypes = {
   sut: UpdateUserByIdUseCase
   getUserByIdRepositoryStub: GetUserByIdRepository
   updateUserByIdRepositoryStub: UpdateUserByIdRepository
-  getUserByEmailRepositoryStub: GetUserByEmailRepository
 }
 
 const makeSut = (): SutTypes => {
   const getUserByIdRepositoryStub = makeGetUserByIdRepositoryStub()
   const updateUserByIdRepositoryStub = makeUpdateUserByIdRepositoryStub()
-  const getUserByEmailRepositoryStub = makeGetUserByEmailRepositoryStub()
   const sut = new UpdateUserByIdUseCase(
     getUserByIdRepositoryStub,
-    updateUserByIdRepositoryStub,
-    getUserByEmailRepositoryStub
+    updateUserByIdRepositoryStub
   )
   return {
     sut,
     getUserByIdRepositoryStub,
-    updateUserByIdRepositoryStub,
-    getUserByEmailRepositoryStub
+    updateUserByIdRepositoryStub
   }
 }
 
@@ -131,37 +113,6 @@ describe('UpdateUserByIdUseCase', () => {
       phone: undefined
     })
     expect(user).toEqual(left(new RequiredFieldError('phone')))
-  })
-
-  it('Should call GetUserByEmailRepository with correct param', async () => {
-    const { sut, getUserByEmailRepositoryStub } = makeSut()
-    const getUserByEmailSpy = vi.spyOn(
-      getUserByEmailRepositoryStub,
-      'getByEmail'
-    )
-    await sut.execute('any_id', makeUpdateUserModel())
-    expect(getUserByEmailSpy).toHaveBeenCalledOnce()
-    expect(getUserByEmailSpy).toHaveBeenCalledWith(makeUpdateUserModel().email)
-  })
-
-  it('Should throw if GetUserByEmailRepository throws', async () => {
-    const { sut, getUserByEmailRepositoryStub } = makeSut()
-    vi.spyOn(getUserByEmailRepositoryStub, 'getByEmail').mockRejectedValueOnce(
-      new Error()
-    )
-    const promise = sut.execute('any_id', makeUpdateUserModel())
-    await expect(promise).rejects.toThrow(new Error())
-  })
-
-  it('Should returns left error if GetUserByEmailRepository returns a user', async () => {
-    const { sut, getUserByEmailRepositoryStub } = makeSut()
-    vi.spyOn(getUserByEmailRepositoryStub, 'getByEmail').mockResolvedValueOnce(
-      makeUserModel()
-    )
-    const user = await sut.execute('any_id', makeUpdateUserModel())
-    expect(user).toEqual(
-      left(new EmailAlreadyInUseError(makeUpdateUserModel().email))
-    )
   })
 
   it('Should return updated data on success', async () => {

@@ -13,8 +13,7 @@ import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-ema
 export class UpdateUserByIdUseCase implements UpdateUserById {
   constructor(
     private readonly getUserByIdRepository: GetUserByIdRepository,
-    private readonly updateUserByIdRepository: UpdateUserByIdRepository,
-    private readonly getUserByEmailRepository: GetUserByEmailRepository
+    private readonly updateUserByIdRepository: UpdateUserByIdRepository
   ) {}
 
   async execute(
@@ -25,13 +24,6 @@ export class UpdateUserByIdUseCase implements UpdateUserById {
 
     if (!user) {
       return left(new NotFoundError())
-    }
-
-    const existingUserWithEmail =
-      await this.getUserByEmailRepository.getByEmail(params.email)
-
-    if (existingUserWithEmail) {
-      return left(new EmailAlreadyInUseError(params.email))
     }
 
     const validationError = await validate(params)
