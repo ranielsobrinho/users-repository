@@ -4,9 +4,5 @@ import { UsersRepository } from '@/infra/database/postgres/users/users-postgres-
 
 export const makeUpdateUserByIdUseCase = (): UpdateUserById => {
   const usersRepository = new UsersRepository()
-  return new UpdateUserByIdUseCase(
-    usersRepository,
-    usersRepository,
-    usersRepository
-  )
+  return new UpdateUserByIdUseCase(usersRepository, usersRepository)
 }
