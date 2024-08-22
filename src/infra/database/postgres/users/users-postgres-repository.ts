@@ -66,7 +66,7 @@ export class UsersRepository
   ): Promise<UpdateUserByIdRepository.Result> {
     const client = await DatabaseHelper.getClient()
     const result = await client.query(
-      'UPDATE FROM seucarlos.users SET name = $1, email = $2, phone = $3 WHERE id = $4 RETURNING *',
+      'UPDATE seucarlos.users SET name = $1, email = $2, phone = $3 WHERE id = $4 RETURNING *',
       [updateUserData.name, updateUserData.email, updateUserData.phone, userId]
     )
     return result.rows[0]
