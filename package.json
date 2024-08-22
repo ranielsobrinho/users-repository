@@ -4,7 +4,7 @@
   "description": "Users api with Express, TypeORM and JWT",
   "main": "server.ts",
   "scripts": {
-    "start": "node dist/main/server.js",
+    "start": "node --inspect dist/main/server.js",
     "build": "rimraf dist/ && npx tsc",
     "dev": "npm run build && npm start",
     "test": "vitest --passWithNoTests --silent",
