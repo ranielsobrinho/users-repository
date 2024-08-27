@@ -15,15 +15,32 @@ const makeUserRequest = () => ({
   phone: 'any_phone'
 })
 
+const makeLoadUserByEmailRepositoryStub = (): GetUserByEmailRepository => {
+  class LoadUserByEmailRepositoryStub implements GetUserByEmailRepository {
+    async getByEmail(_email: string): Promise<any> {
+      return makeUserModel()
+    }
+  }
+  return new LoadUserByEmailRepositoryStub()
+}
+
+type SutTypes = {
+  sut: AuthenticateUseCase
+  loadUserByEmailRepositoryStub: GetUserByEmailRepository
+}
+
+const makeSut = (): SutTypes => {
+  const loadUserByEmailRepositoryStub = makeLoadUserByEmailRepositoryStub()
+  const sut = new AuthenticateUseCase(loadUserByEmailRepositoryStub)
+  return {
+    sut,
+    loadUserByEmailRepositoryStub
+  }
+}
+
 describe('AuthenticateUseCase', () => {
   it('Should call GetUserByEmailRepository with correct param', async () => {
-    class LoadUserByEmailRepositoryStub implements GetUserByEmailRepository {
-      async getByEmail(_email: string): Promise<any> {
-        return makeUserModel()
-      }
-    }
-    const loadUserByEmailRepositoryStub = new LoadUserByEmailRepositoryStub()
-    const sut = new AuthenticateUseCase(loadUserByEmailRepositoryStub)
+    const { sut, loadUserByEmailRepositoryStub } = makeSut()
     const getUserSpy = vi.spyOn(loadUserByEmailRepositoryStub, 'getByEmail')
     await sut.execute(makeUserRequest())
     expect(getUserSpy).toHaveBeenCalledWith(makeUserRequest().email)
