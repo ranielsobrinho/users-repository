@@ -5,7 +5,7 @@ export class JwtAdapter implements TokenGenerator {
   constructor(private readonly salt: string) {}
 
   async generate(param: TokenGenerator.Param): Promise<TokenGenerator.Result> {
-    jwt.sign(param, this.salt, { expiresIn: '12h' })
-    return 'any_token'
+    const accessToken = jwt.sign(param, this.salt, { expiresIn: '12h' })
+    return accessToken
   }
 }
