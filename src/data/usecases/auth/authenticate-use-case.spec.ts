@@ -2,7 +2,7 @@ import { describe, it, vi, expect } from 'vitest'
 import { GetUserByEmailRepository } from '../../protocols/users/get-user-by-email-repository'
 import { UserModel } from '../../../domain/models/user-model'
 import { AuthenticateUseCase } from './authenticate-use-case'
-import { left } from '../../../shared'
+import { left, right } from '../../../shared'
 import { NotFoundError } from '../../errors'
 import { TokenGenerator } from '../../protocols/criptography/token-generator'
 
@@ -96,5 +96,11 @@ describe('AuthenticateUseCase', () => {
     vi.spyOn(tokenGeneratorStub, 'generate').mockRejectedValueOnce(new Error())
     const promise = sut.execute(makeUserRequest())
     expect(promise).rejects.toThrow(new Error())
+  })
+
+  it('Should return access token on success', async () => {
+    const { sut } = makeSut()
+    const response = await sut.execute(makeUserRequest())
+    expect(response).toEqual(right('any_token'))
   })
 })
