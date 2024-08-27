@@ -2,6 +2,8 @@ import { describe, it, vi, expect } from 'vitest'
 import { GetUserByEmailRepository } from '../../protocols/users/get-user-by-email-repository'
 import { UserModel } from '../../../domain/models/user-model'
 import { AuthenticateUseCase } from './authenticate-use-case'
+import { left } from '../../../shared'
+import { NotFoundError } from '../../errors'
 
 const makeUserModel = (): UserModel => ({
   id: 'any_id',
@@ -53,5 +55,14 @@ describe('AuthenticateUseCase', () => {
     )
     const promise = sut.execute(makeUserRequest())
     expect(promise).rejects.toThrow(new Error())
+  })
+
+  it('Should return left error if GetUserByEmailRepository returns null', async () => {
+    const { sut, loadUserByEmailRepositoryStub } = makeSut()
+    vi.spyOn(loadUserByEmailRepositoryStub, 'getByEmail').mockResolvedValueOnce(
+      null
+    )
+    const response = await sut.execute(makeUserRequest())
+    expect(response).toEqual(left(new NotFoundError()))
   })
 })
