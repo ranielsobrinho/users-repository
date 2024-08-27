@@ -3,7 +3,7 @@ import { Authentication } from '../../../domain/usecases/authentication/authenti
 import { Either, right, left } from '../../../shared'
 import { HttpRequest } from '../../protocols/http'
 import { LoginController } from './login-controller'
-import { notFound, serverError } from '../../helpers/http-helper'
+import { notFound, serverError, ok } from '../../helpers/http-helper'
 import { NotFoundError } from '../../errors/not-found-error'
 
 const makeLoginRequest = (): HttpRequest => ({
@@ -62,5 +62,11 @@ describe('LoginController', () => {
     )
     const httpResponse = await sut.handle(makeLoginRequest())
     expect(httpResponse).toEqual(notFound(new NotFoundError()))
+  })
+
+  it('Should return 200 on success', async () => {
+    const { sut } = makeSut()
+    const httpResponse = await sut.handle(makeLoginRequest())
+    expect(httpResponse).toEqual(ok('any_token'))
   })
 })
