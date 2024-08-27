@@ -1,9 +1,10 @@
 import { describe, it, expect, vi } from 'vitest'
 import { Authentication } from '../../../domain/usecases/authentication/authentication'
-import { Either, right } from '../../../shared'
+import { Either, right, left } from '../../../shared'
 import { HttpRequest } from '../../protocols/http'
 import { LoginController } from './login-controller'
-import { serverError } from '../../helpers/http-helper'
+import { notFound, serverError } from '../../helpers/http-helper'
+import { NotFoundError } from '../../errors/not-found-error'
 
 const makeLoginRequest = (): HttpRequest => ({
   body: {
@@ -52,5 +53,14 @@ describe('LoginController', () => {
     )
     const httpResponse = await sut.handle(makeLoginRequest())
     expect(httpResponse).toEqual(serverError(new Error()))
+  })
+
+  it('Should return 404 if AuthenticationUseCase returns null', async () => {
+    const { sut, authenticationUseCaseStub } = makeSut()
+    vi.spyOn(authenticationUseCaseStub, 'execute').mockResolvedValueOnce(
+      left(new NotFoundError())
+    )
+    const httpResponse = await sut.handle(makeLoginRequest())
+    expect(httpResponse).toEqual(notFound(new NotFoundError()))
   })
 })
