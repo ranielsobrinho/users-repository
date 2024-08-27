@@ -1,5 +1,9 @@
 import { Authentication } from '@/domain/usecases/authentication/authentication'
-import { noContent, serverError } from '@/presentation/helpers/http-helper'
+import {
+  noContent,
+  serverError,
+  notFound
+} from '@/presentation/helpers/http-helper'
 import { Controller, HttpRequest, HttpResponse } from '@/presentation/protocols'
 
 export class LoginController implements Controller {
@@ -8,7 +12,13 @@ export class LoginController implements Controller {
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
       const { email, phone } = httpRequest.body
-      await this.authenticationUseCase.execute({ email, phone })
+      const tokenOrError = await this.authenticationUseCase.execute({
+        email,
+        phone
+      })
+      if (tokenOrError.isLeft()) {
+        return notFound(tokenOrError.value)
+      }
       return noContent()
     } catch (error) {
       return serverError(error)
