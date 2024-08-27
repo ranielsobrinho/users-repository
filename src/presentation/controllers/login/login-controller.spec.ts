@@ -3,6 +3,7 @@ import { Authentication } from '../../../domain/usecases/authentication/authenti
 import { Either, right } from '../../../shared'
 import { HttpRequest } from '../../protocols/http'
 import { LoginController } from './login-controller'
+import { serverError } from '../../helpers/http-helper'
 
 const makeLoginRequest = (): HttpRequest => ({
   body: {
@@ -42,5 +43,14 @@ describe('LoginController', () => {
     const authSpy = vi.spyOn(authenticationUseCaseStub, 'execute')
     await sut.handle(makeLoginRequest())
     expect(authSpy).toHaveBeenCalledWith(makeLoginRequest().body)
+  })
+
+  it('Should return 500 if AuthenticationUseCase throws', async () => {
+    const { sut, authenticationUseCaseStub } = makeSut()
+    vi.spyOn(authenticationUseCaseStub, 'execute').mockRejectedValueOnce(
+      new Error()
+    )
+    const httpResponse = await sut.handle(makeLoginRequest())
+    expect(httpResponse).toEqual(serverError(new Error()))
   })
 })
