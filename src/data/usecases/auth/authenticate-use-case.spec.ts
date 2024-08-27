@@ -4,6 +4,7 @@ import { UserModel } from '../../../domain/models/user-model'
 import { AuthenticateUseCase } from './authenticate-use-case'
 import { left } from '../../../shared'
 import { NotFoundError } from '../../errors'
+import { TokenGenerator } from '../../protocols/criptography/token-generator'
 
 const makeUserModel = (): UserModel => ({
   id: 'any_id',
@@ -19,24 +20,41 @@ const makeUserRequest = () => ({
 
 const makeLoadUserByEmailRepositoryStub = (): GetUserByEmailRepository => {
   class LoadUserByEmailRepositoryStub implements GetUserByEmailRepository {
-    async getByEmail(_email: string): Promise<any> {
+    async getByEmail(_email: string): Promise<GetUserByEmailRepository.Result> {
       return makeUserModel()
     }
   }
   return new LoadUserByEmailRepositoryStub()
 }
 
+const makeTokenGeneratorStub = (): TokenGenerator => {
+  class TokenGeneratorStub implements TokenGenerator {
+    async generate(
+      _param: TokenGenerator.Param
+    ): Promise<TokenGenerator.Result> {
+      return 'any_token'
+    }
+  }
+  return new TokenGeneratorStub()
+}
+
 type SutTypes = {
   sut: AuthenticateUseCase
   loadUserByEmailRepositoryStub: GetUserByEmailRepository
+  tokenGeneratorStub: TokenGenerator
 }
 
 const makeSut = (): SutTypes => {
   const loadUserByEmailRepositoryStub = makeLoadUserByEmailRepositoryStub()
-  const sut = new AuthenticateUseCase(loadUserByEmailRepositoryStub)
+  const tokenGeneratorStub = makeTokenGeneratorStub()
+  const sut = new AuthenticateUseCase(
+    loadUserByEmailRepositoryStub,
+    tokenGeneratorStub
+  )
   return {
     sut,
-    loadUserByEmailRepositoryStub
+    loadUserByEmailRepositoryStub,
+    tokenGeneratorStub
   }
 }
 
@@ -64,5 +82,12 @@ describe('AuthenticateUseCase', () => {
     )
     const response = await sut.execute(makeUserRequest())
     expect(response).toEqual(left(new NotFoundError()))
+  })
+
+  it('Should call TokenGenerator with correct param', async () => {
+    const { sut, tokenGeneratorStub } = makeSut()
+    const generateTokenSpy = vi.spyOn(tokenGeneratorStub, 'generate')
+    await sut.execute(makeUserRequest())
+    expect(generateTokenSpy).toHaveBeenCalledWith(makeUserModel().id)
   })
 })
