@@ -45,4 +45,13 @@ describe('AuthenticateUseCase', () => {
     await sut.execute(makeUserRequest())
     expect(getUserSpy).toHaveBeenCalledWith(makeUserRequest().email)
   })
+
+  it('Should throw if GetUserByEmailRepository throws', async () => {
+    const { sut, loadUserByEmailRepositoryStub } = makeSut()
+    vi.spyOn(loadUserByEmailRepositoryStub, 'getByEmail').mockRejectedValueOnce(
+      new Error()
+    )
+    const promise = sut.execute(makeUserRequest())
+    expect(promise).rejects.toThrow(new Error())
+  })
 })
