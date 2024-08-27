@@ -11,17 +11,34 @@ const makeLoginRequest = (): HttpRequest => ({
   }
 })
 
+const makeAuthenticationUseCaseStub = (): Authentication => {
+  class AuthenticationUseCaseStub implements Authentication {
+    async execute(
+      _params: Authentication.Params
+    ): Promise<Either<Error, Authentication.Result>> {
+      return right('any_token')
+    }
+  }
+  return new AuthenticationUseCaseStub()
+}
+
+type SutTypes = {
+  sut: LoginController
+  authenticationUseCaseStub: Authentication
+}
+
+const makeSut = (): SutTypes => {
+  const authenticationUseCaseStub = makeAuthenticationUseCaseStub()
+  const sut = new LoginController(authenticationUseCaseStub)
+  return {
+    sut,
+    authenticationUseCaseStub
+  }
+}
+
 describe('LoginController', () => {
   it('Should call AuthenticationUseCase with correct params', async () => {
-    class AuthenticationUseCaseStub implements Authentication {
-      async execute(
-        _params: Authentication.Params
-      ): Promise<Either<Error, Authentication.Result>> {
-        return right('any_token')
-      }
-    }
-    const authenticationUseCaseStub = new AuthenticationUseCaseStub()
-    const sut = new LoginController(authenticationUseCaseStub)
+    const { sut, authenticationUseCaseStub } = makeSut()
     const authSpy = vi.spyOn(authenticationUseCaseStub, 'execute')
     await sut.handle(makeLoginRequest())
     expect(authSpy).toHaveBeenCalledWith(makeLoginRequest().body)
