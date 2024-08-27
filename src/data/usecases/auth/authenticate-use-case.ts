@@ -1,8 +1,5 @@
 import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-email-repository'
-import {
-  Authentication,
-  AuthenticationModel
-} from '@/domain/usecases/authentication/authentication'
+import { Authentication } from '@/domain/usecases/authentication/authentication'
 import { Either, right } from '@/shared'
 
 export class AuthenticateUseCase implements Authentication {
