@@ -16,7 +16,8 @@ export class AuthenticateUseCase implements Authentication {
       params.email
     )
     if (userData) {
-      await this.tokenGenerator.generate(userData.id)
+      const accessToken = await this.tokenGenerator.generate(userData.id)
+      return right(accessToken)
     }
     return left(new NotFoundError())
   }
