@@ -1,9 +1,5 @@
 import { Authentication } from '@/domain/usecases/authentication/authentication'
-import {
-  noContent,
-  serverError,
-  notFound
-} from '@/presentation/helpers/http-helper'
+import { ok, serverError, notFound } from '@/presentation/helpers/http-helper'
 import { Controller, HttpRequest, HttpResponse } from '@/presentation/protocols'
 
 export class LoginController implements Controller {
@@ -16,10 +12,12 @@ export class LoginController implements Controller {
         email,
         phone
       })
+
       if (tokenOrError.isLeft()) {
         return notFound(tokenOrError.value)
       }
-      return noContent()
+
+      return ok(tokenOrError.value)
     } catch (error) {
       return serverError(error)
     }
