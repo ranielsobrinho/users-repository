@@ -6,7 +6,7 @@ export type AuthenticationModel = {
 }
 
 export interface Authentication {
-  auth(
+  execute(
     params: Authentication.Params
   ): Promise<Either<Error, Authentication.Result>>
 }
