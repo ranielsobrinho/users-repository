@@ -1,5 +1,6 @@
 import { EmailAlreadyInUseError } from '@/data/errors/email-already-in-use-error'
 import { RequiredFieldError } from '@/data/errors/required-field-error'
+import { TokenGenerator } from '@/data/protocols/criptography/token-generator'
 import { CreateUserRepository } from '@/data/protocols/users/create-user-repository'
 import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-email-repository'
 import { validate } from '@/data/utils/validate-params'
@@ -9,7 +10,8 @@ import { Either, left, right } from '@/shared'
 export class CreateUserUseCase implements CreateUser {
   constructor(
     private readonly getUserByEmailRepository: GetUserByEmailRepository,
-    private readonly createUserRepository: CreateUserRepository
+    private readonly createUserRepository: CreateUserRepository,
+    private readonly tokenGenerator: TokenGenerator
   ) {}
   async execute(
     params: CreateUser.Params
@@ -29,6 +31,8 @@ export class CreateUserUseCase implements CreateUser {
       if (!userCreated) {
         return left(new EmailAlreadyInUseError(email))
       }
+      // TODO: Deve retornar um token de acesso
+      await this.tokenGenerator.generate(userCreated.id)
       return right(userCreated)
     }
     return left(new EmailAlreadyInUseError(email))
