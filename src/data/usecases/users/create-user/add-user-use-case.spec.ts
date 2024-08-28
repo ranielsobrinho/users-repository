@@ -4,6 +4,7 @@ import { GetUserByEmailRepository } from '../../../protocols/users/get-user-by-e
 import { CreateUserRepository } from '../../../protocols/users/create-user-repository'
 import { EmailAlreadyInUseError, RequiredFieldError } from '../../../errors'
 import { CreateUserUseCase } from './add-user-use-case'
+import { TokenGenerator } from '../../../protocols/criptography/token-generator'
 
 const makeCreateUserRequest = () => ({
   name: 'any_name',
@@ -38,23 +39,38 @@ const makeCreateUserRepositoryStub = (): CreateUserRepository => {
   return new CreateUserRepositoryStub()
 }
 
+const makeTokenGeneratorStub = (): TokenGenerator => {
+  class TokenGeneratorStub implements TokenGenerator {
+    async generate(
+      _param: TokenGenerator.Param
+    ): Promise<TokenGenerator.Result> {
+      return 'any_token'
+    }
+  }
+  return new TokenGeneratorStub()
+}
+
 type SutTypes = {
   sut: CreateUserUseCase
   getUserByEmailRepositoryStub: GetUserByEmailRepository
   createUserRepositoryStub: CreateUserRepository
+  tokenGeneratorStub: TokenGenerator
 }
 
 const makeSut = (): SutTypes => {
   const getUserByEmailRepositoryStub = makeGetUserByEmailRepositoryStub()
   const createUserRepositoryStub = makeCreateUserRepositoryStub()
+  const tokenGeneratorStub = makeTokenGeneratorStub()
   const sut = new CreateUserUseCase(
     getUserByEmailRepositoryStub,
-    createUserRepositoryStub
+    createUserRepositoryStub,
+    tokenGeneratorStub
   )
   return {
     sut,
     getUserByEmailRepositoryStub,
-    createUserRepositoryStub
+    createUserRepositoryStub,
+    tokenGeneratorStub
   }
 }
 
@@ -132,5 +148,12 @@ describe('CreateUserUseCase', () => {
     const { sut } = makeSut()
     const userData = await sut.execute(makeCreateUserRequest())
     expect(userData).toEqual(right(makeUserModel()))
+  })
+
+  it('Should call TokenGenerator with correct param', async () => {
+    const { sut, tokenGeneratorStub } = makeSut()
+    const tokenGenSpy = vi.spyOn(tokenGeneratorStub, 'generate')
+    await sut.execute(makeCreateUserRequest())
+    expect(tokenGenSpy).toHaveBeenCalledWith('any_id')
   })
 })
