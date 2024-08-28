@@ -31,9 +31,8 @@ export class CreateUserUseCase implements CreateUser {
       if (!userCreated) {
         return left(new EmailAlreadyInUseError(email))
       }
-      // TODO: Deve retornar um token de acesso
-      await this.tokenGenerator.generate(userCreated.id)
-      return right(userCreated)
+      const accessToken = await this.tokenGenerator.generate(userCreated.id)
+      return right(accessToken)
     }
     return left(new EmailAlreadyInUseError(email))
   }
