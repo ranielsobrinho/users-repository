@@ -17,7 +17,7 @@ const makeCreateUserUseCaseStub = (): CreateUser => {
     async execute(
       _params: CreateUser.Params
     ): Promise<Either<Error, CreateUser.Result>> {
-      return right({ id: 'any_id' })
+      return right('any_token')
     }
   }
   return new CreateUserUseCaseStub()
@@ -81,6 +81,6 @@ describe('CreateUserController', () => {
   it('Should return 200 on success', async () => {
     const { sut } = makeSut()
     const httpResponse = await sut.handle(makeCreateUserRequest())
-    expect(httpResponse).toEqual(ok({ id: 'any_id' }))
+    expect(httpResponse).toEqual(ok('any_token'))
   })
 })
