@@ -3,6 +3,8 @@ import setupRoutes from './routes'
 import setupMiddlewares from './middlewares'
 import morgan from 'morgan'
 import cors from 'cors'
+import helmet from 'helmet'
+import compression from 'compression'
 
 morgan.token('body', (req: express.Request) => {
   const isNotGet = req.method !== 'GET'
@@ -14,7 +16,14 @@ morgan.token('body', (req: express.Request) => {
 
 const app = express()
 app.use(morgan(':date[iso] :method :url :status :body - :total-time ms'))
-app.use(cors())
+app.use(
+  cors({
+    origin: ['*'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE']
+  })
+)
+app.use(helmet())
+app.use(compression({ level: 6 }))
 setupMiddlewares(app)
 setupRoutes(app)
 
