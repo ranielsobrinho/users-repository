@@ -156,4 +156,11 @@ describe('CreateUserUseCase', () => {
     await sut.execute(makeCreateUserRequest())
     expect(tokenGenSpy).toHaveBeenCalledWith('any_id')
   })
+
+  it('Should throw if TokenGenerator throws', async () => {
+    const { sut, tokenGeneratorStub } = makeSut()
+    vi.spyOn(tokenGeneratorStub, 'generate').mockRejectedValueOnce(new Error())
+    const promise = sut.execute(makeCreateUserRequest())
+    expect(promise).rejects.toThrow(new Error())
+  })
 })
