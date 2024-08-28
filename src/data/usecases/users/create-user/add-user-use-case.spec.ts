@@ -144,12 +144,6 @@ describe('CreateUserUseCase', () => {
     await expect(promise).rejects.toThrow(new Error())
   })
 
-  it('Should return user data on success', async () => {
-    const { sut } = makeSut()
-    const userData = await sut.execute(makeCreateUserRequest())
-    expect(userData).toEqual(right(makeUserModel()))
-  })
-
   it('Should call TokenGenerator with correct param', async () => {
     const { sut, tokenGeneratorStub } = makeSut()
     const tokenGenSpy = vi.spyOn(tokenGeneratorStub, 'generate')
@@ -162,5 +156,11 @@ describe('CreateUserUseCase', () => {
     vi.spyOn(tokenGeneratorStub, 'generate').mockRejectedValueOnce(new Error())
     const promise = sut.execute(makeCreateUserRequest())
     expect(promise).rejects.toThrow(new Error())
+  })
+
+  it('Should return access token on success', async () => {
+    const { sut } = makeSut()
+    const accessToken = await sut.execute(makeCreateUserRequest())
+    expect(accessToken).toEqual(right('any_token'))
   })
 })
