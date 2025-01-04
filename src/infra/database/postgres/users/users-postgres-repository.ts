@@ -20,9 +20,10 @@ export class UsersRepository
   ): Promise<CreateUserRepository.Result> {
     const client = await DatabaseHelper.getClient()
     const result = await client.query(
-      'INSERT INTO seucarlos.users(name, email, phone) VALUES ($1, $2, $3) RETURNING *',
-      [params.name, params.email, params.phone]
+      'INSERT INTO seucarlos.users(name, email, phone, password) VALUES ($1, $2, $3, $4) RETURNING *',
+      [params.name, params.email, params.phone, params.password]
     )
+
     return result.rows[0] ?? null
   }
 
