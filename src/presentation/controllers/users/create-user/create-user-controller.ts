@@ -7,11 +7,12 @@ export class CreateUserController implements Controller {
   constructor(private readonly createUserUseCase: CreateUser) {}
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
-      const { name, email, phone } = httpRequest.body
+      const { name, email, phone, password } = httpRequest.body
       const response = await this.createUserUseCase.execute({
         name,
         email,
-        phone
+        phone,
+        password
       })
 
       if (response.isLeft()) {
