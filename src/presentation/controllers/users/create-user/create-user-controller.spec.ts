@@ -27,7 +27,8 @@ const makeCreateUserRequest = (): HttpRequest => ({
   body: {
     name: 'any_name',
     email: 'any_email',
-    phone: 'any_phone'
+    phone: 'any_phone',
+    password: 'any_password'
   }
 })
 
@@ -54,7 +55,8 @@ describe('CreateUserController', () => {
     expect(creatUserSpy).toHaveBeenCalledWith({
       name: 'any_name',
       email: 'any_email',
-      phone: 'any_phone'
+      phone: 'any_phone',
+      password: 'any_password'
     })
   })
 
