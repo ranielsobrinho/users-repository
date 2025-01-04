@@ -67,6 +67,6 @@ describe('LoginController', () => {
   it('Should return 200 on success', async () => {
     const { sut } = makeSut()
     const httpResponse = await sut.handle(makeLoginRequest())
-    expect(httpResponse).toEqual(ok('any_token'))
+    expect(httpResponse).toEqual(ok({ token: 'any_token' }))
   })
 })
