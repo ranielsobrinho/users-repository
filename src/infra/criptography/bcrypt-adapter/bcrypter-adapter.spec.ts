@@ -14,10 +14,15 @@ vi.mock('bcrypt', async () => {
   }
 })
 
+const salt = 12
+
+const makeSut = (): BcryptAdapter => {
+  return new BcryptAdapter(salt)
+}
+
 describe('BcryptAdapter', () => {
   it('Should call hash with correct value', async () => {
-    const salt = 12
-    const sut = new BcryptAdapter(salt)
+    const sut = makeSut()
     const hashSpy = vi.spyOn(bcrypt, 'hash')
     await sut.generate('any_value')
     expect(hashSpy).toHaveBeenCalledWith('any_value', salt)
