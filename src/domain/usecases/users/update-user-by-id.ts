@@ -9,6 +9,6 @@ export interface UpdateUserById {
 }
 
 export namespace UpdateUserById {
-  export type Params = Omit<UserModel, 'id'>
+  export type Params = Omit<UserModel, 'id' | 'password'>
   export type Result = UserModel
 }

@@ -26,7 +26,8 @@ export class InMemoryUsersRepository
         id: '1',
         name: params.name,
         email: params.email,
-        phone: params.phone
+        phone: params.phone,
+        password: params.password
       }
       this.repository.push(user)
       return user
@@ -59,7 +60,11 @@ export class InMemoryUsersRepository
     updateUserData: UpdateUserByIdRepository.Params
   ): Promise<UpdateUserByIdRepository.Result> {
     const found = this.repository.findIndex((user) => user.id === userId)
-    this.repository[found] = { id: userId, ...updateUserData }
+    this.repository[found] = {
+      id: userId,
+      password: this.repository[found].password,
+      ...updateUserData
+    }
     return this.repository[found]
   }
 }

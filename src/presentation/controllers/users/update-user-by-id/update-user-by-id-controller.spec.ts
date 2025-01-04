@@ -16,7 +16,8 @@ const makeUserModel = (): UserModel => ({
   id: 'any_id',
   name: 'any_name',
   email: 'any_email',
-  phone: 'any_phone'
+  phone: 'any_phone',
+  password: 'hashed_password'
 })
 
 const makeUpdateRequest = (): HttpRequest => ({
