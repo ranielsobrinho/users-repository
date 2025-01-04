@@ -3,7 +3,7 @@ import { GetUserByEmailRepository } from '../../protocols/users/get-user-by-emai
 import { UserModel } from '../../../domain/models/user-model'
 import { AuthenticateUseCase } from './authenticate-use-case'
 import { left, right } from '../../../shared'
-import { NotFoundError } from '../../errors'
+import { NotFoundError, IncorrectPasswordError } from '../../errors'
 import { TokenGenerator } from '../../protocols/criptography/token-generator'
 import { HashComparer } from '../../protocols/criptography/hash-comparer'
 
@@ -127,6 +127,13 @@ describe('AuthenticateUseCase', () => {
     vi.spyOn(hashComparerStub, 'compare').mockRejectedValueOnce(new Error())
     const promise = sut.execute(makeUserRequest())
     expect(promise).rejects.toThrow(new Error())
+  })
+
+  it('Should return left error if HashComparer returns false', async () => {
+    const { sut, hashComparerStub } = makeSut()
+    vi.spyOn(hashComparerStub, 'compare').mockResolvedValueOnce(false)
+    const response = await sut.execute(makeUserRequest())
+    expect(response).toEqual(left(new IncorrectPasswordError()))
   })
 
   it('Should return access token on success', async () => {
