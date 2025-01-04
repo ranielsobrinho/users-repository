@@ -5,17 +5,19 @@ import { AuthenticateUseCase } from './authenticate-use-case'
 import { left, right } from '../../../shared'
 import { NotFoundError } from '../../errors'
 import { TokenGenerator } from '../../protocols/criptography/token-generator'
+import { HashComparer } from '../../protocols/criptography/hash-comparer'
 
 const makeUserModel = (): UserModel => ({
   id: 'any_id',
   name: 'any_name',
   email: 'any_email',
-  phone: 'any_phone'
+  phone: 'any_phone',
+  password: 'hashed_password'
 })
 
 const makeUserRequest = () => ({
   email: 'any_email',
-  phone: 'any_phone'
+  password: 'any_password'
 })
 
 const makeLoadUserByEmailRepositoryStub = (): GetUserByEmailRepository => {
@@ -38,23 +40,35 @@ const makeTokenGeneratorStub = (): TokenGenerator => {
   return new TokenGeneratorStub()
 }
 
+const makeHashComparerStub = (): HashComparer => {
+  class HashComparerStub implements HashComparer {
+    async compare(_value: string, _hash: string): Promise<boolean> {
+      return true
+    }
+  }
+  return new HashComparerStub()
+}
 type SutTypes = {
   sut: AuthenticateUseCase
   loadUserByEmailRepositoryStub: GetUserByEmailRepository
   tokenGeneratorStub: TokenGenerator
+  hashComparerStub: HashComparer
 }
 
 const makeSut = (): SutTypes => {
   const loadUserByEmailRepositoryStub = makeLoadUserByEmailRepositoryStub()
   const tokenGeneratorStub = makeTokenGeneratorStub()
+  const hashComparerStub = makeHashComparerStub()
   const sut = new AuthenticateUseCase(
     loadUserByEmailRepositoryStub,
-    tokenGeneratorStub
+    tokenGeneratorStub,
+    hashComparerStub
   )
   return {
     sut,
     loadUserByEmailRepositoryStub,
-    tokenGeneratorStub
+    tokenGeneratorStub,
+    hashComparerStub
   }
 }
 
@@ -96,6 +110,16 @@ describe('AuthenticateUseCase', () => {
     vi.spyOn(tokenGeneratorStub, 'generate').mockRejectedValueOnce(new Error())
     const promise = sut.execute(makeUserRequest())
     expect(promise).rejects.toThrow(new Error())
+  })
+
+  it('Should call HashComparer with correct param', async () => {
+    const { sut, hashComparerStub } = makeSut()
+    const generateTokenSpy = vi.spyOn(hashComparerStub, 'compare')
+    await sut.execute(makeUserRequest())
+    expect(generateTokenSpy).toHaveBeenCalledWith(
+      makeUserRequest().password,
+      makeUserModel().password
+    )
   })
 
   it('Should return access token on success', async () => {
