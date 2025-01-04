@@ -27,4 +27,13 @@ describe('BcryptAdapter', () => {
     await sut.generate('any_value')
     expect(hashSpy).toHaveBeenCalledWith('any_value', salt)
   })
+
+  it('Should throw if hash throws', async () => {
+    const sut = makeSut()
+    vi.spyOn(bcrypt, 'hash').mockImplementationOnce(async () => {
+      return Promise.reject(new Error())
+    })
+    const promise = sut.generate('any_value')
+    await expect(promise).rejects.toThrow(new Error())
+  })
 })
