@@ -17,7 +17,9 @@ export class LoginController implements Controller {
         return notFound(tokenOrError.value)
       }
 
-      return ok(tokenOrError.value)
+      return ok({
+        token: tokenOrError.value
+      })
     } catch (error) {
       return serverError(error)
     }
