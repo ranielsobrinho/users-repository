@@ -30,7 +30,7 @@ export class UsersRepository
   async getByEmail(email: string): Promise<GetUserByEmailRepository.Result> {
     const client = await DatabaseHelper.getClient()
     const result = await client.query(
-      'SELECT * FROM seucarlos.users WHERE email = $1',
+      'SELECT name, email, phone FROM seucarlos.users WHERE email = $1',
       [email]
     )
     return result.rows[0] ?? null
@@ -38,14 +38,16 @@ export class UsersRepository
 
   async listAll(): Promise<ListAllUsersRepository.Result> {
     const client = await DatabaseHelper.getClient()
-    const result = await client.query('SELECT * FROM seucarlos.users')
+    const result = await client.query(
+      'SELECT name, email, phone, created_at FROM seucarlos.users'
+    )
     return result.rows
   }
 
   async getById(userId: string): Promise<GetUserByIdRepository.Result> {
     const client = await DatabaseHelper.getClient()
     const result = await client.query(
-      'SELECT * FROM seucarlos.users WHERE seucarlos.users.id = $1',
+      'SELECT name, email, phone, created_at FROM seucarlos.users WHERE seucarlos.users.id = $1',
       [userId]
     )
     return result.rows[0] ?? null
