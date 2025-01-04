@@ -1,4 +1,5 @@
 import { NotFoundError } from '@/data/errors'
+import { IncorrectPasswordError } from '@/data/errors/password-error'
 import { HashComparer } from '@/data/protocols/criptography/hash-comparer'
 import { TokenGenerator } from '@/data/protocols/criptography/token-generator'
 import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-email-repository'
@@ -22,7 +23,9 @@ export class AuthenticateUseCase implements Authentication {
         params.password,
         userData.password
       )
-
+      if (!isValid) {
+        return left(new IncorrectPasswordError())
+      }
       const accessToken = await this.tokenGenerator.generate(userData.id)
       return right(accessToken)
     }
