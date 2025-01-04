@@ -5,18 +5,27 @@ import { CreateUserRepository } from '../../../protocols/users/create-user-repos
 import { EmailAlreadyInUseError, RequiredFieldError } from '../../../errors'
 import { CreateUserUseCase } from './add-user-use-case'
 import { TokenGenerator } from '../../../protocols/criptography/token-generator'
+import { Encrypter } from '../../../protocols/criptography/encrypter'
 
 const makeCreateUserRequest = () => ({
   name: 'any_name',
   email: 'any_email',
-  phone: 'any_phone'
+  phone: 'any_phone',
+  password: 'any_password'
 })
 
+const makeCreateUserRequestWithHashedPassword = () => ({
+  name: 'any_name',
+  email: 'any_email',
+  phone: 'any_phone',
+  password: 'hashed_password'
+})
 const makeUserModel = () => ({
   id: 'any_id',
   name: 'any_name',
   email: 'any_email',
-  phone: 'any_phone'
+  phone: 'any_phone',
+  password: 'hashed_password'
 })
 
 const makeGetUserByEmailRepositoryStub = (): GetUserByEmailRepository => {
@@ -50,6 +59,15 @@ const makeTokenGeneratorStub = (): TokenGenerator => {
   return new TokenGeneratorStub()
 }
 
+const makeEncrypterStub = (): Encrypter => {
+  class EncrypterStub implements Encrypter {
+    async generate(_value: string): Promise<string> {
+      return 'hashed_password'
+    }
+  }
+  return new EncrypterStub()
+}
+
 type SutTypes = {
   sut: CreateUserUseCase
   getUserByEmailRepositoryStub: GetUserByEmailRepository
@@ -61,10 +79,12 @@ const makeSut = (): SutTypes => {
   const getUserByEmailRepositoryStub = makeGetUserByEmailRepositoryStub()
   const createUserRepositoryStub = makeCreateUserRepositoryStub()
   const tokenGeneratorStub = makeTokenGeneratorStub()
+  const encrypterStub = makeEncrypterStub()
   const sut = new CreateUserUseCase(
     getUserByEmailRepositoryStub,
     createUserRepositoryStub,
-    tokenGeneratorStub
+    tokenGeneratorStub,
+    encrypterStub
   )
   return {
     sut,
@@ -80,7 +100,8 @@ describe('CreateUserUseCase', () => {
     const user = await sut.execute({
       name: 'any_name',
       email: 'any_email',
-      phone: undefined
+      phone: undefined,
+      password: 'any_password'
     })
     expect(user).toEqual(left(new RequiredFieldError('phone')))
   })
@@ -123,7 +144,9 @@ describe('CreateUserUseCase', () => {
     const createUserSpy = vi.spyOn(createUserRepositoryStub, 'createUser')
     await sut.execute(makeCreateUserRequest())
     expect(createUserSpy).toHaveBeenCalledOnce()
-    expect(createUserSpy).toHaveBeenCalledWith(makeCreateUserRequest())
+    expect(createUserSpy).toHaveBeenCalledWith(
+      makeCreateUserRequestWithHashedPassword()
+    )
   })
 
   it('Should return error if CreateUserRepository returns null', async () => {
