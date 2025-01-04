@@ -9,7 +9,7 @@ import { NotFoundError } from '../../errors/not-found-error'
 const makeLoginRequest = (): HttpRequest => ({
   body: {
     email: 'any_email',
-    phone: 'any_phone'
+    password: 'any_password'
   }
 })
 

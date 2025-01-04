@@ -7,10 +7,10 @@ export class LoginController implements Controller {
 
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
-      const { email, phone } = httpRequest.body
+      const { email, password } = httpRequest.body
       const tokenOrError = await this.authenticationUseCase.execute({
         email,
-        phone
+        password
       })
 
       if (tokenOrError.isLeft()) {
