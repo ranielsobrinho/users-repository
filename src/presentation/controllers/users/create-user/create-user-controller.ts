@@ -17,7 +17,9 @@ export class CreateUserController implements Controller {
       if (response.isLeft()) {
         return badRequest(response.value)
       }
-      return ok(response.value)
+      return ok({
+        token: response.value
+      })
     } catch (error) {
       return serverError(error)
     }
