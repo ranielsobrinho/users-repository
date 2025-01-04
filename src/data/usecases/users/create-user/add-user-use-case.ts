@@ -1,5 +1,6 @@
 import { EmailAlreadyInUseError } from '@/data/errors/email-already-in-use-error'
 import { RequiredFieldError } from '@/data/errors/required-field-error'
+import { Encrypter } from '@/data/protocols/criptography/encrypter'
 import { TokenGenerator } from '@/data/protocols/criptography/token-generator'
 import { CreateUserRepository } from '@/data/protocols/users/create-user-repository'
 import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-email-repository'
@@ -11,14 +12,15 @@ export class CreateUserUseCase implements CreateUser {
   constructor(
     private readonly getUserByEmailRepository: GetUserByEmailRepository,
     private readonly createUserRepository: CreateUserRepository,
-    private readonly tokenGenerator: TokenGenerator
+    private readonly tokenGenerator: TokenGenerator,
+    private readonly encrypter: Encrypter
   ) {}
   async execute(
     params: CreateUser.Params
   ): Promise<
     Either<EmailAlreadyInUseError | RequiredFieldError, CreateUser.Result>
   > {
-    const { email } = params
+    const { email, password } = params
 
     const validationError = await validate(params)
     if (validationError.length) {
@@ -27,7 +29,12 @@ export class CreateUserUseCase implements CreateUser {
 
     const user = await this.getUserByEmailRepository.getByEmail(email)
     if (!user) {
-      const userCreated = await this.createUserRepository.createUser(params)
+      const hashedPassword = await this.encrypter.generate(password)
+      const dataDto = {
+        ...params,
+        password: hashedPassword
+      }
+      const userCreated = await this.createUserRepository.createUser(dataDto)
       if (!userCreated) {
         return left(new EmailAlreadyInUseError(email))
       }
