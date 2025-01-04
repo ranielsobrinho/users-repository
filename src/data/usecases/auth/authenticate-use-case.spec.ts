@@ -122,6 +122,13 @@ describe('AuthenticateUseCase', () => {
     )
   })
 
+  it('Should throw if HashComparer throws', async () => {
+    const { sut, hashComparerStub } = makeSut()
+    vi.spyOn(hashComparerStub, 'compare').mockRejectedValueOnce(new Error())
+    const promise = sut.execute(makeUserRequest())
+    expect(promise).rejects.toThrow(new Error())
+  })
+
   it('Should return access token on success', async () => {
     const { sut } = makeSut()
     const response = await sut.execute(makeUserRequest())
