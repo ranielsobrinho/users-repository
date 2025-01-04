@@ -2,7 +2,7 @@ import { Either } from '@/shared'
 
 export type AuthenticationModel = {
   email: string
-  phone: string
+  password: string
 }
 
 export interface Authentication {
