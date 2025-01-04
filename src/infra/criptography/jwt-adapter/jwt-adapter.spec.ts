@@ -24,9 +24,7 @@ describe('JwtAdapter', () => {
       const sut = makeSut()
       const generateTokenSpy = vi.spyOn(jwt, 'sign')
       await sut.generate('any_id')
-      expect(generateTokenSpy).toHaveBeenCalledWith('any_id', 'secret', {
-        expiresIn: '12h'
-      })
+      expect(generateTokenSpy).toHaveBeenCalledWith('any_id', 'secret')
     })
 
     it('Should throw if sign throws', async () => {
