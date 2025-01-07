@@ -55,5 +55,14 @@ describe('BcryptAdapter', () => {
       await sut.compare('any_value', 'any_hashed_value')
       expect(hashSpy).toHaveBeenCalledWith('any_value', 'any_hashed_value')
     })
+
+    it('Should throw if compare throws', async () => {
+      const sut = makeSut()
+      vi.spyOn(bcrypt, 'compare').mockImplementationOnce(async () => {
+        return Promise.reject(new Error())
+      })
+      const promise = sut.compare('any_value', 'any_hashed_value')
+      await expect(promise).rejects.toThrow(new Error())
+    })
   })
 })
