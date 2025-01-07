@@ -30,6 +30,7 @@ describe('BcryptAdapter', () => {
       const hashSpy = vi.spyOn(bcrypt, 'hash')
       await sut.generate('any_value')
       expect(hashSpy).toHaveBeenCalledWith('any_value', salt)
+      expect(hashSpy).toHaveBeenCalledOnce()
     })
 
     it('Should throw if hash throws', async () => {
@@ -54,6 +55,7 @@ describe('BcryptAdapter', () => {
       const hashSpy = vi.spyOn(bcrypt, 'compare')
       await sut.compare('any_value', 'any_hashed_value')
       expect(hashSpy).toHaveBeenCalledWith('any_value', 'any_hashed_value')
+      expect(hashSpy).toHaveBeenCalledOnce()
     })
 
     it('Should throw if compare throws', async () => {
