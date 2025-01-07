@@ -9,6 +9,9 @@ vi.mock('bcrypt', async () => {
       ...actual,
       hash: (): Promise<string> => {
         return Promise.resolve('hashed_value')
+      },
+      compare: (): Promise<boolean> => {
+        return Promise.resolve(true)
       }
     }
   }
@@ -21,25 +24,36 @@ const makeSut = (): BcryptAdapter => {
 }
 
 describe('BcryptAdapter', () => {
-  it('Should call hash with correct value', async () => {
-    const sut = makeSut()
-    const hashSpy = vi.spyOn(bcrypt, 'hash')
-    await sut.generate('any_value')
-    expect(hashSpy).toHaveBeenCalledWith('any_value', salt)
-  })
-
-  it('Should throw if hash throws', async () => {
-    const sut = makeSut()
-    vi.spyOn(bcrypt, 'hash').mockImplementationOnce(async () => {
-      return Promise.reject(new Error())
+  describe('generate', () => {
+    it('Should call hash with correct value', async () => {
+      const sut = makeSut()
+      const hashSpy = vi.spyOn(bcrypt, 'hash')
+      await sut.generate('any_value')
+      expect(hashSpy).toHaveBeenCalledWith('any_value', salt)
     })
-    const promise = sut.generate('any_value')
-    await expect(promise).rejects.toThrow(new Error())
+
+    it('Should throw if hash throws', async () => {
+      const sut = makeSut()
+      vi.spyOn(bcrypt, 'hash').mockImplementationOnce(async () => {
+        return Promise.reject(new Error())
+      })
+      const promise = sut.generate('any_value')
+      await expect(promise).rejects.toThrow(new Error())
+    })
+
+    it('Should return a hash on success', async () => {
+      const sut = makeSut()
+      const hash = await sut.generate('any_value')
+      expect(hash).toBe('hashed_value')
+    })
   })
 
-  it('Should return a hash on success', async () => {
-    const sut = makeSut()
-    const hash = await sut.generate('any_value')
-    expect(hash).toBe('hashed_value')
+  describe('compare', () => {
+    it('Should call compare with correct values', async () => {
+      const sut = makeSut()
+      const hashSpy = vi.spyOn(bcrypt, 'compare')
+      await sut.compare('any_value', 'any_hashed_value')
+      expect(hashSpy).toHaveBeenCalledWith('any_value', 'any_hashed_value')
+    })
   })
 })
