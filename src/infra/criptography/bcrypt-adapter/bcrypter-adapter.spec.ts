@@ -64,5 +64,14 @@ describe('BcryptAdapter', () => {
       const promise = sut.compare('any_value', 'any_hashed_value')
       await expect(promise).rejects.toThrow(new Error())
     })
+
+    it('Should return false if compare fails', async () => {
+      const sut = makeSut()
+      vi.spyOn(bcrypt, 'compare').mockImplementationOnce(async () => {
+        return Promise.resolve(false)
+      })
+      const result = await sut.compare('any_value', 'any_hashed_value')
+      expect(result).toBeFalsy()
+    })
   })
 })
