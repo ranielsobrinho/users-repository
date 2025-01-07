@@ -73,5 +73,11 @@ describe('BcryptAdapter', () => {
       const result = await sut.compare('any_value', 'any_hashed_value')
       expect(result).toBeFalsy()
     })
+
+    it('Should return true on success', async () => {
+      const sut = makeSut()
+      const result = await sut.compare('any_value', 'any_hashed_value')
+      expect(result).toBeTruthy()
+    })
   })
 })
