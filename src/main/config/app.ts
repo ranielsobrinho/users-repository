@@ -15,13 +15,13 @@ morgan.token('body', (req: express.Request) => {
 })
 
 const app = express()
-app.use(morgan(':date[iso] :method :url :status :body - :total-time ms'))
 app.use(
   cors({
-    origin: ['*'],
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE']
   })
 )
+app.use(morgan(':date[iso] :method :url :status :body - :total-time ms'))
 app.use(helmet())
 app.use(compression({ level: 6 }))
 setupMiddlewares(app)
