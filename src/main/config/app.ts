@@ -5,6 +5,7 @@ import morgan from 'morgan'
 import cors from 'cors'
 import helmet from 'helmet'
 import compression from 'compression'
+import { limiter } from './rate-limit'
 
 morgan.token('body', (req: express.Request) => {
   const isNotGet = req.method !== 'GET'
@@ -24,6 +25,7 @@ app.use(
 app.use(morgan(':date[iso] :method :url :status :body - :total-time ms'))
 app.use(helmet())
 app.use(compression({ level: 6 }))
+app.use(limiter)
 setupMiddlewares(app)
 setupRoutes(app)
 
