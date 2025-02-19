@@ -1,6 +1,7 @@
 import './config/module-alias'
 require('dotenv').config()
 import DatabaseHelper from '../infra/database/postgres/helpers/postgres-helper'
+import { startMetricsServer } from './config/metrics'
 
 DatabaseHelper.connect()
   .then(async () => {
@@ -9,6 +10,7 @@ DatabaseHelper.connect()
     app.listen(5000, () =>
       console.log(`=== Server running on http://localhost:5000 ===`)
     )
+    startMetricsServer()
   })
   .catch((err) => {
     console.error(err)
