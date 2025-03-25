@@ -9,7 +9,6 @@ export default (app: Express): void => {
     res.send({ Status: 'OK' })
   })
 
-  // eslint-disable-next-line node/no-path-concat
   readdirSync(`${__dirname}/../routes`).map(async (file) => {
     if (!file.includes('.test.')) {
       ;(await import(`../routes/${file}`)).default(router)

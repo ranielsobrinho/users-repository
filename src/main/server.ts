@@ -1,4 +1,5 @@
 import './config/module-alias'
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 require('dotenv').config()
 import DatabaseHelper from '../infra/database/postgres/helpers/postgres-helper'
 import { startMetricsServer } from './config/metrics'
