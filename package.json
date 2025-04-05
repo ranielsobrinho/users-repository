@@ -1,6 +1,6 @@
 {
   "name": "users-service-api",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Users api with Express, TypeORM and JWT",
   "main": "server.ts",
   "scripts": {
@@ -48,7 +48,7 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^7.2.1",
-    "git-commit-msg-linter": "^5.0.7",
+    "git-commit-msg-linter": "^5.0.8",
     "globals": "^15.0.0",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
