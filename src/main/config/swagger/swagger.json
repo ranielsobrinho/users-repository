@@ -9,8 +9,8 @@
       "url": "https://opensource.org/licenses/MIT"
     }
   },
-  "host": "localhost:3000",
-  "basePath": "/docs",
+  "host": "localhost:5000",
+  "basePath": "/api",
   "tags": [
     {
       "name": "Users",
@@ -21,7 +21,7 @@
   "consumes": ["application/json"],
   "produces": ["application/json"],
   "paths": {
-    "/users": {
+    "/signup": {
       "post": {
         "tags": ["Users"],
         "description": "Create new user in system",
@@ -44,7 +44,9 @@
             }
           }
         }
-      },
+      }
+    },
+    "/users": {
       "get": {
         "tags": ["Users"],
         "summary": "Get all users in system",
@@ -84,11 +86,8 @@
         "summary": "Delete user with given ID",
         "tags": ["Users"],
         "responses": {
-          "200": {
-            "description": "User is deleted",
-            "schema": {
-              "$ref": "#/definitions/UserGet"
-            }
+          "204": {
+            "description": "User is deleted"
           }
         }
       },
