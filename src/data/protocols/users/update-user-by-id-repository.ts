@@ -9,5 +9,5 @@ export interface UpdateUserByIdRepository {
 
 export namespace UpdateUserByIdRepository {
   export type Params = Omit<UserModel, 'id' | 'password'>
-  export type Result = UserModel
+  export type Result = Omit<UserModel, 'password'>
 }
