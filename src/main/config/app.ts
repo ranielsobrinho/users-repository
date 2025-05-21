@@ -28,7 +28,7 @@ app.use(morgan(':date[iso] :method :url :status :body - :total-time ms'))
 app.use(helmet())
 app.use(compression({ level: 6 }))
 app.use(limiter)
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 setupMiddlewares(app)
 setupRoutes(app)
 
