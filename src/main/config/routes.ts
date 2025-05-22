@@ -9,7 +9,7 @@ export default (app: Express): void => {
     res.send({ Status: 'OK' })
   })
 
-  readdirSync(`${__dirname}/../routes`).map(async (file) => {
+  readdirSync(`${__dirname}/../routes`).forEach(async (file) => {
     if (!file.includes('.test.')) {
       ;(await import(`../routes/${file}`)).default(router)
     }
