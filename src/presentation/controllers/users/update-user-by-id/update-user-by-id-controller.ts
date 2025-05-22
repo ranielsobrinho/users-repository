@@ -20,12 +20,12 @@ export class UpdateUserController implements Controller {
       })
 
       if (userOrError.isLeft() && userOrError.value.name === 'NotFoundError') {
-        return notFound(userOrError.value as Error)
+        return notFound(userOrError.value)
       } else if (
         userOrError.isLeft() &&
         userOrError.value.name === 'RequiredFieldError'
       ) {
-        return badRequest(userOrError.value as Error)
+        return badRequest(userOrError.value)
       }
       return ok(userOrError.value)
     } catch (error) {

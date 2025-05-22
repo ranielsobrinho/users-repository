@@ -8,7 +8,7 @@ export class GetUserByIdController implements Controller {
     try {
       const { userId } = httpRequest.params
 
-      const user = await this.getUserByIdUseCase.execute(userId!)
+      const user = await this.getUserByIdUseCase.execute(userId)
 
       if (user.isLeft()) {
         return notFound(user.value)

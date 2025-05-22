@@ -7,7 +7,7 @@ const DB_NAME: string = process.env.DB_NAME!
 const DB_PORT: number = Number(process.env.DB_PORT!)
 
 class PostgresHelper {
-  private client = new Pool({
+  private readonly client = new Pool({
     host: DB_HOST,
     user: DB_USER,
     password: DB_PASSWORD,
