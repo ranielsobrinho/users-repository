@@ -30,7 +30,7 @@ export class UsersRepository
   async getByEmail(email: string): Promise<GetUserByEmailRepository.Result> {
     const client = await DatabaseHelper.getClient()
     const result = await client.query(
-      'SELECT id, name, email, phone FROM seucarlos.users WHERE email = $1',
+      'SELECT id, name, email, phone, password FROM seucarlos.users WHERE email = $1',
       [email]
     )
     return result.rows[0] ?? null
