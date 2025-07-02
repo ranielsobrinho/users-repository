@@ -8,6 +8,7 @@ import compression from 'compression'
 import { limiter } from './rate-limit'
 import swaggerUi from 'swagger-ui-express'
 import swaggerDocument from './swagger/swagger.json'
+import { startMetricsServer } from './metrics'
 
 morgan.token('body', (req: express.Request) => {
   const isNotGet = req.method !== 'GET'
@@ -31,5 +32,6 @@ app.use(limiter)
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 setupMiddlewares(app)
 setupRoutes(app)
+startMetricsServer(app)
 
 export default app
