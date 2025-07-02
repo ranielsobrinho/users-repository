@@ -1,8 +1,10 @@
 import express, { Request, Response } from 'express'
 import client from 'prom-client'
+import logger from './logger'
 
 const app = express()
 
+const KEY = '[Metrics]:'
 export function startMetricsServer(): void {
   const collectDefaultMetrics = client.collectDefaultMetrics
 
@@ -12,6 +14,6 @@ export function startMetricsServer(): void {
     return res.send(await client.register.metrics())
   })
   app.listen(9101, () => {
-    console.log('❕ Metrics server started at http://localhost:9101')
+    logger.info(`${KEY} Metrics server started at http://localhost:9101`)
   })
 }

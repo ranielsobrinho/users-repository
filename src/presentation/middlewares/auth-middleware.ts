@@ -1,5 +1,8 @@
+import logger from '@/main/config/logger'
 import { NextFunction, Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
+
+const KEY = '[AuthMiddleware]: '
 
 export class AuthMiddleware {
   async handle(
@@ -42,7 +45,7 @@ export class AuthMiddleware {
 
       return next()
     } catch (error) {
-      console.log('Olha o erro =>', error)
+      logger.error(`${KEY} ${error}`)
       return res.status(500).json({
         error: 'Token inválido'
       })
