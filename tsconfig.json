@@ -3,7 +3,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "target": "ES2021",
-    "sourceMap": true,
+    "sourceMap": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "module": "CommonJS",
