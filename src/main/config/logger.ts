@@ -4,7 +4,8 @@ const { transports } = winston
 
 winston.addColors({
   info: 'black whiteBG',
-  warn: 'black yellowBG'
+  warn: 'black yellowBG',
+  error: 'black redBG'
 })
 
 const myFormat = winston.format.printf(
