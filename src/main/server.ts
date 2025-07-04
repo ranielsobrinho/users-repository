@@ -2,7 +2,7 @@ import './config/module-alias'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 require('dotenv').config()
 import DatabaseHelper from '../infra/database/postgres/helpers/postgres-helper'
-import { startMetricsServer } from './config/metrics'
+import shutdownHandlers from './config/shutdownHandlers'
 import logger from './config/logger'
 
 const KEY = '[Server]: '
@@ -10,10 +10,11 @@ DatabaseHelper.connect()
   .then(async () => {
     logger.info('=== Postgres connected ===')
     const app = (await import('./config/app')).default
-    app.listen(5000, () =>
+    const server = app.listen(5000, () =>
       logger.info(`=== Server running on http://localhost:5000 ===`)
     )
-    startMetricsServer()
+
+    shutdownHandlers.init(server)
   })
   .catch((err) => {
     logger.error(`${KEY} ${err}`)
