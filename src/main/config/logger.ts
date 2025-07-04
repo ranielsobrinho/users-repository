@@ -3,7 +3,8 @@ import * as winston from 'winston'
 const { transports } = winston
 
 winston.addColors({
-  info: 'black whiteBG'
+  info: 'black whiteBG',
+  warn: 'black yellowBG'
 })
 
 const myFormat = winston.format.printf(
@@ -23,6 +24,9 @@ const logger = winston.createLogger({
         winston.format.timestamp(),
         myFormat
       )
+    }),
+    new transports.Console({
+      level: 'warn'
     })
   ],
   defaultMeta: true,
