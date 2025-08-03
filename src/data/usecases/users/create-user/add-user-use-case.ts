@@ -2,6 +2,7 @@ import { EmailAlreadyInUseError } from '@/data/errors/email-already-in-use-error
 import { RequiredFieldError } from '@/data/errors/required-field-error'
 import { Encrypter } from '@/data/protocols/criptography/encrypter'
 import { TokenGenerator } from '@/data/protocols/criptography/token-generator'
+import { SendNewAccountEmailNotificationProtocol } from '@/data/protocols/messaging/email/new-account-notification-protocol'
 import { CreateUserRepository } from '@/data/protocols/users/create-user-repository'
 import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-email-repository'
 import { validate } from '@/data/utils/validate-params'
@@ -13,7 +14,8 @@ export class CreateUserUseCase implements CreateUser {
     private readonly getUserByEmailRepository: GetUserByEmailRepository,
     private readonly createUserRepository: CreateUserRepository,
     private readonly tokenGenerator: TokenGenerator,
-    private readonly encrypter: Encrypter
+    private readonly encrypter: Encrypter,
+    private readonly sendNewAccountEmailNotification: SendNewAccountEmailNotificationProtocol
   ) {}
   async execute(
     params: CreateUser.Params
@@ -39,6 +41,11 @@ export class CreateUserUseCase implements CreateUser {
         return left(new EmailAlreadyInUseError(email))
       }
       const accessToken = await this.tokenGenerator.generate(userCreated.id)
+      await this.sendNewAccountEmailNotification.sendEmail({
+        email: userCreated.email,
+        subject: 'NOVA CONTA CRIADA',
+        body: `Obrigado ${userCreated.name}, sua conta foi criada. Esperamos que tenha uma ótima experiência conosco.`
+      })
       return right(accessToken)
     }
     return left(new EmailAlreadyInUseError(email))
