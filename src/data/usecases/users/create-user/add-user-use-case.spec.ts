@@ -6,6 +6,7 @@ import { EmailAlreadyInUseError, RequiredFieldError } from '../../../errors'
 import { CreateUserUseCase } from './add-user-use-case'
 import { TokenGenerator } from '../../../protocols/criptography/token-generator'
 import { Encrypter } from '../../../protocols/criptography/encrypter'
+import { SendNewAccountEmailNotificationProtocol } from '../../../protocols/messaging/email/new-account-notification-protocol'
 
 const makeCreateUserRequest = () => ({
   name: 'any_name',
@@ -20,6 +21,7 @@ const makeCreateUserRequestWithHashedPassword = () => ({
   phone: 'any_phone',
   password: 'hashed_password'
 })
+
 const makeUserModel = () => ({
   id: 'any_id',
   name: 'any_name',
@@ -68,11 +70,30 @@ const makeEncrypterStub = (): Encrypter => {
   return new EncrypterStub()
 }
 
+const makeCreateNotificationPayload = (): any => ({
+  email: makeCreateUserRequest().email,
+  subject: 'NOVA CONTA CRIADA',
+  body: `Obrigado ${makeCreateUserRequest().name}, sua conta foi criada. Esperamos que tenha uma ótima experiência conosco.`
+})
+
+const makeSendNewAccountEmailNotificationProtocolStub =
+  (): SendNewAccountEmailNotificationProtocol => {
+    class SendNewAccountNotificationProtocolStub
+      implements SendNewAccountEmailNotificationProtocol
+    {
+      async sendEmail(
+        params: SendNewAccountEmailNotificationProtocol.Params
+      ): Promise<SendNewAccountEmailNotificationProtocol.Result> {}
+    }
+    return new SendNewAccountNotificationProtocolStub()
+  }
+
 type SutTypes = {
   sut: CreateUserUseCase
   getUserByEmailRepositoryStub: GetUserByEmailRepository
   createUserRepositoryStub: CreateUserRepository
   tokenGeneratorStub: TokenGenerator
+  sendNewAccountEmailNotificationProtocolStub: SendNewAccountEmailNotificationProtocol
 }
 
 const makeSut = (): SutTypes => {
@@ -80,17 +101,22 @@ const makeSut = (): SutTypes => {
   const createUserRepositoryStub = makeCreateUserRepositoryStub()
   const tokenGeneratorStub = makeTokenGeneratorStub()
   const encrypterStub = makeEncrypterStub()
+  const sendNewAccountEmailNotificationProtocolStub =
+    makeSendNewAccountEmailNotificationProtocolStub()
+
   const sut = new CreateUserUseCase(
     getUserByEmailRepositoryStub,
     createUserRepositoryStub,
     tokenGeneratorStub,
-    encrypterStub
+    encrypterStub,
+    sendNewAccountEmailNotificationProtocolStub
   )
   return {
     sut,
     getUserByEmailRepositoryStub,
     createUserRepositoryStub,
-    tokenGeneratorStub
+    tokenGeneratorStub,
+    sendNewAccountEmailNotificationProtocolStub
   }
 }
 
@@ -179,6 +205,19 @@ describe('CreateUserUseCase', () => {
     vi.spyOn(tokenGeneratorStub, 'generate').mockRejectedValueOnce(new Error())
     const promise = sut.execute(makeCreateUserRequest())
     expect(promise).rejects.toThrow(new Error())
+  })
+
+  it('Should call SendNewAccountEmailNotificationProtocol with correct params', async () => {
+    const { sut, sendNewAccountEmailNotificationProtocolStub } = makeSut()
+    const sendNotificationSpy = vi.spyOn(
+      sendNewAccountEmailNotificationProtocolStub,
+      'sendEmail'
+    )
+    await sut.execute(makeCreateUserRequest())
+    expect(sendNotificationSpy).toHaveBeenCalledWith(
+      makeCreateNotificationPayload()
+    )
+    expect(sendNotificationSpy).toHaveBeenCalledOnce()
   })
 
   it('Should return access token on success', async () => {

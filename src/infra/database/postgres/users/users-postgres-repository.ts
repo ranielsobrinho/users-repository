@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { CreateUserRepository } from '@/data/protocols/users/create-user-repository'
 import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-email-repository'
 import { GetUserByIdRepository } from '@/data/protocols/users/get-user-by-id-repository'
@@ -20,8 +21,8 @@ export class UsersRepository
   ): Promise<CreateUserRepository.Result> {
     const client = await DatabaseHelper.getClient()
     const result = await client.query(
-      'INSERT INTO seucarlos.users(name, email, phone, password) VALUES ($1, $2, $3, $4) RETURNING *',
-      [params.name, params.email, params.phone, params.password]
+      'INSERT INTO users(id, name, email, phone, password) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [randomUUID(), params.name, params.email, params.phone, params.password]
     )
 
     return result.rows[0] ?? null
@@ -30,7 +31,7 @@ export class UsersRepository
   async getByEmail(email: string): Promise<GetUserByEmailRepository.Result> {
     const client = await DatabaseHelper.getClient()
     const result = await client.query(
-      'SELECT id, name, email, phone, password FROM seucarlos.users WHERE email = $1',
+      'SELECT id, name, email, phone, password FROM users WHERE email = $1',
       [email]
     )
     return result.rows[0] ?? null
@@ -39,7 +40,7 @@ export class UsersRepository
   async listAll(): Promise<ListAllUsersRepository.Result> {
     const client = await DatabaseHelper.getClient()
     const result = await client.query(
-      'SELECT id, name, email, phone, created_at FROM seucarlos.users'
+      'SELECT id, name, email, phone, created_at FROM users'
     )
     return result.rows
   }
@@ -47,7 +48,7 @@ export class UsersRepository
   async getById(userId: string): Promise<GetUserByIdRepository.Result> {
     const client = await DatabaseHelper.getClient()
     const result = await client.query(
-      'SELECT id, name, email, phone, created_at FROM seucarlos.users WHERE seucarlos.users.id = $1',
+      'SELECT id, name, email, phone, created_at FROM users WHERE users.id = $1',
       [userId]
     )
     return result.rows[0] ?? null
@@ -55,10 +56,9 @@ export class UsersRepository
 
   async deleteById(userId: string): Promise<DeleteUserRepository.Result> {
     const client = await DatabaseHelper.getClient()
-    const result = await client.query(
-      'DELETE FROM seucarlos.users WHERE seucarlos.users.id = $1',
-      [userId]
-    )
+    const result = await client.query('DELETE FROM users WHERE users.id = $1', [
+      userId
+    ])
     return result.rows[0]
   }
 
@@ -68,7 +68,7 @@ export class UsersRepository
   ): Promise<UpdateUserByIdRepository.Result> {
     const client = await DatabaseHelper.getClient()
     const result = await client.query(
-      'UPDATE seucarlos.users SET name = $1, email = $2, phone = $3 WHERE id = $4 RETURNING id, name, email, phone, created_at',
+      'UPDATE users SET name = $1, email = $2, phone = $3 WHERE id = $4 RETURNING id, name, email, phone, created_at',
       [updateUserData.name, updateUserData.email, updateUserData.phone, userId]
     )
     return result.rows[0]
