@@ -13,8 +13,6 @@ class RabbitMQConnection {
       process.exit(1)
     }
 
-    console.log(`COnexão = ${AQMP_CONNECTION}`)
-
     if (this.connected && this.channel) return
     else this.connected = true
 
