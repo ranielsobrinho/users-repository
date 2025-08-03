@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { CreateUserRepository } from '@/data/protocols/users/create-user-repository'
 import { GetUserByEmailRepository } from '@/data/protocols/users/get-user-by-email-repository'
 import { GetUserByIdRepository } from '@/data/protocols/users/get-user-by-id-repository'
@@ -20,8 +21,8 @@ export class UsersRepository
   ): Promise<CreateUserRepository.Result> {
     const client = await DatabaseHelper.getClient()
     const result = await client.query(
-      'INSERT INTO seucarlos.users(name, email, phone, password) VALUES ($1, $2, $3, $4) RETURNING *',
-      [params.name, params.email, params.phone, params.password]
+      'INSERT INTO users(id, name, email, phone, password) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [randomUUID(), params.name, params.email, params.phone, params.password]
     )
 
     return result.rows[0] ?? null
