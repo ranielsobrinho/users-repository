@@ -6,12 +6,19 @@ import shutdownHandlers from './config/shutdownHandlers'
 import logger from './config/logger'
 
 const KEY = '[Server]: '
+const PORT = process.env.PORT
+
+if (!PORT) {
+  logger.error('PORT MUST BE CONFIGURED')
+  process.exit(1)
+}
+
 DatabaseHelper.connect()
   .then(async () => {
     logger.info('=== Postgres connected ===')
     const app = (await import('./config/app')).default
-    const server = app.listen(5000, () =>
-      logger.info(`=== Server running on http://localhost:5000 ===`)
+    const server = app.listen(PORT, () =>
+      logger.info(`=== Server running on http://localhost:${PORT} ===`)
     )
 
     shutdownHandlers.init(server)
