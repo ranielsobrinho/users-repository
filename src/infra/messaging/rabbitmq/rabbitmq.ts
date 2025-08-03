@@ -40,6 +40,8 @@ class RabbitMQConnection {
         await this.connect()
       }
 
+      await this.channel.assertQueue(queue, { durable: true })
+
       this.channel.sendToQueue(
         queue,
         Buffer.from(
