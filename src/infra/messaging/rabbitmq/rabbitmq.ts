@@ -1,6 +1,7 @@
 import { Channel, connect, ChannelModel } from 'amqplib'
-import logger from '@/main/config/logger'
+import { logger } from '@/main/config/pino-logger'
 
+const KEY = '[RabbitMQConnection]:'
 class RabbitMQConnection {
   connection!: ChannelModel
   channel!: Channel
@@ -9,7 +10,7 @@ class RabbitMQConnection {
   async connect(): Promise<void> {
     const AQMP_CONNECTION = process.env.AQMP_CONNECTION
     if (!AQMP_CONNECTION) {
-      logger.warn('AQMP_CONNECTION MUST BE CONFIGURED')
+      logger.warn(`${KEY} AQMP_CONNECTION MUST BE CONFIGURED`)
       process.exit(1)
     }
 
@@ -17,15 +18,15 @@ class RabbitMQConnection {
     else this.connected = true
 
     try {
-      logger.info('Connecting to Rabbit-MQ Server')
+      logger.info(`${KEY} Connecting to Rabbit-MQ Server`)
       this.connection = await connect(AQMP_CONNECTION)
 
-      logger.info('✅ RabbitMQ Connection is ready')
+      logger.info(`${KEY} ✅ RabbitMQ Connection is ready`)
 
       this.channel = await this.connection.createChannel()
     } catch (error) {
-      logger.error(error)
-      logger.error('🚫 Not connected to MQ Server')
+      logger.error(`${KEY} ${error}`)
+      logger.error(`${KEY} 🚫 Not connected to MQ Server`)
       throw error
     }
   }
@@ -52,7 +53,7 @@ class RabbitMQConnection {
         )
       )
     } catch (error) {
-      logger.error(error)
+      logger.error(`${KEY} ${error}`)
       throw error
     }
   }

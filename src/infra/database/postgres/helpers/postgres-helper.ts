@@ -1,4 +1,4 @@
-import logger from '@/main/config/logger'
+import { logger } from '@/main/config/pino-logger'
 import { Pool } from 'pg'
 
 const DB_HOST: string = process.env.DB_HOST!

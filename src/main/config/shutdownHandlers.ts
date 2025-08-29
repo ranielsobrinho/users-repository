@@ -1,7 +1,7 @@
 import { createHttpTerminator } from 'http-terminator'
 import DatabaseHelper from '@/infra/database/postgres/helpers/postgres-helper'
 
-import logger from './logger'
+import { logger } from './pino-logger'
 
 const init = (server: any) => {
   const httpTerminator = createHttpTerminator({
