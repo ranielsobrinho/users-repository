@@ -1,9 +1,10 @@
 import './config/module-alias'
+import { logger } from './config/pino-logger'
+import '../infra/observability/otel'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 require('dotenv').config()
 import DatabaseHelper from '../infra/database/postgres/helpers/postgres-helper'
 import shutdownHandlers from './config/shutdownHandlers'
-import logger from './config/logger'
 import RabbitMQConnection from '@/infra/messaging/rabbitmq/rabbitmq'
 
 const KEY = '[Server]: '

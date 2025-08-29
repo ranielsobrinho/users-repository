@@ -1,4 +1,4 @@
-import logger from '@/main/config/logger'
+import { logger } from '@/main/config/pino-logger'
 import { NextFunction, Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
 

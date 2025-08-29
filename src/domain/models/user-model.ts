@@ -4,4 +4,5 @@ export type UserModel = {
   email: string
   phone: string
   password: string
+  created_at?: Date
 }
