@@ -3,3 +3,5 @@ dist
 coverage
 .env
 .scannerwork
+grafana-datasources.yml
+container-data/
