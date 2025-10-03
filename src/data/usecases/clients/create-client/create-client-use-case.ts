@@ -19,7 +19,12 @@ export class CreateClientUseCase implements CreateClient {
       return left(new RequiredFieldError(validationError))
     }
 
-    await this.getClientByEmailRepository.getByEmail(email)
+    const client = await this.getClientByEmailRepository.getByEmail(email)
+
+    if (client) {
+      return left(new EmailAlreadyInUseError(email))
+    }
+
     return right({
       email: 'test',
       id: '1',
