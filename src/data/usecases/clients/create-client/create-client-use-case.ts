@@ -27,14 +27,12 @@ export class CreateClientUseCase implements CreateClient {
       return left(new EmailAlreadyInUseError(email))
     }
 
-    await this.createClientRepository.createClient(params)
+    const createdClient = await this.createClientRepository.createClient(params)
 
-    return right({
-      email: 'test',
-      id: '1',
-      name: 'lajd',
-      phone: '231414214',
-      created_at: new Date()
-    })
+    if (createdClient) {
+      return right(createdClient)
+    }
+
+    return left(new EmailAlreadyInUseError(email))
   }
 }
