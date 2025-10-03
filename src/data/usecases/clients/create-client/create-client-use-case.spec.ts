@@ -1,8 +1,9 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi, beforeAll, afterAll } from 'vitest'
+import MockDate from 'mockdate'
 import { GetClientByEmailRepository } from '../../../protocols/db/clients/get-client-by-email-repository'
 import { CreateClientRepository } from '../../../protocols/db/clients/create-client-repository'
 import { CreateClientUseCase } from './create-client-use-case'
-import { left } from '../../../../shared'
+import { left, right } from '../../../../shared'
 import { EmailAlreadyInUseError, RequiredFieldError } from '../../../errors'
 
 const makeCreateClientRequest = () => ({
@@ -61,6 +62,13 @@ const makeSut = (): SutTypes => {
 }
 
 describe('CreateClientUseCase', () => {
+  beforeAll(() => {
+    MockDate.set(new Date())
+  })
+
+  afterAll(() => {
+    MockDate.reset()
+  })
   it('Should call GetClientByEmailRepository with correct param', async () => {
     const { sut, getClientByEmailRepositoryStub } = makeSut()
     const getClientByEmailSpy = vi.spyOn(
@@ -129,5 +137,15 @@ describe('CreateClientUseCase', () => {
     )
     const promise = sut.execute(makeCreateClientRequest())
     await expect(promise).rejects.toThrow(new Error())
+  })
+
+  it('Should return created client on success', async () => {
+    const { sut, getClientByEmailRepositoryStub } = makeSut()
+    vi.spyOn(
+      getClientByEmailRepositoryStub,
+      'getByEmail'
+    ).mockResolvedValueOnce(null)
+    const client = await sut.execute(makeCreateClientRequest())
+    expect(client).toEqual(right(makeClientModel()))
   })
 })
