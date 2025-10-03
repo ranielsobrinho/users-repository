@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { GetClientByEmailRepository } from '../../../protocols/db/clients/get-client-by-email-repository'
 import { CreateClientUseCase } from './create-client-use-case'
 import { left } from '../../../../shared'
-import { RequiredFieldError } from '../../../errors'
+import { EmailAlreadyInUseError, RequiredFieldError } from '../../../errors'
 
 const makeCreateClientRequest = () => ({
   name: 'any_name',
@@ -75,5 +75,13 @@ describe('CreateClientUseCase', () => {
     ).mockRejectedValueOnce(new Error())
     const promise = sut.execute(makeCreateClientRequest())
     await expect(promise).rejects.toThrow(new Error())
+  })
+
+  it('Should return left error if GetClientByEmailRepository returns a client', async () => {
+    const { sut } = makeSut()
+    const client = await sut.execute(makeCreateClientRequest())
+    expect(client).toEqual(
+      left(new EmailAlreadyInUseError(makeCreateClientRequest().email))
+    )
   })
 })
