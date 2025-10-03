@@ -1,4 +1,5 @@
 import { EmailAlreadyInUseError, RequiredFieldError } from '@/data/errors'
+import { CreateClientRepository } from '@/data/protocols/db/clients/create-client-repository'
 import { GetClientByEmailRepository } from '@/data/protocols/db/clients/get-client-by-email-repository'
 import { validate } from '@/data/utils/validate-params'
 import { ClientModel } from '@/domain/models/client-model'
@@ -7,7 +8,8 @@ import { Either, left, right } from '@/shared'
 
 export class CreateClientUseCase implements CreateClient {
   constructor(
-    private readonly getClientByEmailRepository: GetClientByEmailRepository
+    private readonly getClientByEmailRepository: GetClientByEmailRepository,
+    private readonly createClientRepository: CreateClientRepository
   ) {}
 
   async execute(
@@ -24,6 +26,8 @@ export class CreateClientUseCase implements CreateClient {
     if (client) {
       return left(new EmailAlreadyInUseError(email))
     }
+
+    await this.createClientRepository.createClient(params)
 
     return right({
       email: 'test',
