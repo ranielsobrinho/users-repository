@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 import { GetClientByEmailRepository } from '../../../protocols/db/clients/get-client-by-email-repository'
 import { CreateClientUseCase } from './create-client-use-case'
+import { left } from '../../../../shared'
+import { RequiredFieldError } from '../../../errors'
 
 const makeCreateClientRequest = () => ({
   name: 'any_name',
@@ -53,5 +55,15 @@ describe('CreateClientUseCase', () => {
     expect(getClientByEmailSpy).toHaveBeenCalledWith(
       makeCreateClientRequest().email
     )
+  })
+
+  it('Should return left error if CreateClientUseCase received null params', async () => {
+    const { sut } = makeSut()
+    const client = await sut.execute({
+      name: 'any_name',
+      email: undefined,
+      phone: 'any_phone'
+    })
+    expect(client).toEqual(left(new RequiredFieldError('email')))
   })
 })
