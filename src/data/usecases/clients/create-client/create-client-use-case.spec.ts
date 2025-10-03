@@ -66,4 +66,14 @@ describe('CreateClientUseCase', () => {
     })
     expect(client).toEqual(left(new RequiredFieldError('email')))
   })
+
+  it('Should throw if GetClientByEmailRepository throws', async () => {
+    const { sut, getClientByEmailRepositoryStub } = makeSut()
+    vi.spyOn(
+      getClientByEmailRepositoryStub,
+      'getByEmail'
+    ).mockRejectedValueOnce(new Error())
+    const promise = sut.execute(makeCreateClientRequest())
+    await expect(promise).rejects.toThrow(new Error())
+  })
 })
