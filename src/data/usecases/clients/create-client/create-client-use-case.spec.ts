@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { GetClientByEmailRepository } from '../../../protocols/db/clients/get-client-by-email-repository'
+import { CreateClientRepository } from '../../../protocols/db/clients/create-client-repository'
 import { CreateClientUseCase } from './create-client-use-case'
 import { left } from '../../../../shared'
 import { EmailAlreadyInUseError, RequiredFieldError } from '../../../errors'
@@ -29,17 +30,33 @@ const makeGetClientByEmailRepositoryStub = (): GetClientByEmailRepository => {
   return new GetClientByEmailRepositoryStub()
 }
 
+const makeCreateClientRepositoryStub = (): CreateClientRepository => {
+  class CreateClientRepositoryStub implements CreateClientRepository {
+    async createClient(_params: CreateClientRepository.Params): Promise<any> {
+      return makeClientModel()
+    }
+  }
+
+  return new CreateClientRepositoryStub()
+}
+
 type SutTypes = {
   sut: CreateClientUseCase
   getClientByEmailRepositoryStub: GetClientByEmailRepository
+  createClientRepositoryStub: CreateClientRepository
 }
 
 const makeSut = (): SutTypes => {
   const getClientByEmailRepositoryStub = makeGetClientByEmailRepositoryStub()
-  const sut = new CreateClientUseCase(getClientByEmailRepositoryStub)
+  const createClientRepositoryStub = makeCreateClientRepositoryStub()
+  const sut = new CreateClientUseCase(
+    getClientByEmailRepositoryStub,
+    createClientRepositoryStub
+  )
   return {
     sut,
-    getClientByEmailRepositoryStub
+    getClientByEmailRepositoryStub,
+    createClientRepositoryStub
   }
 }
 
@@ -83,5 +100,19 @@ describe('CreateClientUseCase', () => {
     expect(client).toEqual(
       left(new EmailAlreadyInUseError(makeCreateClientRequest().email))
     )
+  })
+
+  it('Should call CreateClientRepository with correct param', async () => {
+    const { sut, createClientRepositoryStub, getClientByEmailRepositoryStub } =
+      makeSut()
+    vi.spyOn(
+      getClientByEmailRepositoryStub,
+      'getByEmail'
+    ).mockResolvedValueOnce(null)
+
+    const createClientSpy = vi.spyOn(createClientRepositoryStub, 'createClient')
+    await sut.execute(makeCreateClientRequest())
+    expect(createClientSpy).toHaveBeenCalledOnce()
+    expect(createClientSpy).toHaveBeenCalledWith(makeCreateClientRequest())
   })
 })
