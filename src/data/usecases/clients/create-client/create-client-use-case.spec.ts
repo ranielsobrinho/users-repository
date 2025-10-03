@@ -16,17 +16,34 @@ const makeClientModel = () => ({
   createdAt: new Date()
 })
 
+const makeGetClientByEmailRepositoryStub = (): GetClientByEmailRepository => {
+  class GetClientByEmailRepositoryStub implements GetClientByEmailRepository {
+    async getByEmail(
+      _email: string
+    ): Promise<GetClientByEmailRepository.Result> {
+      return makeClientModel()
+    }
+  }
+  return new GetClientByEmailRepositoryStub()
+}
+
+type SutTypes = {
+  sut: CreateClientUseCase
+  getClientByEmailRepositoryStub: GetClientByEmailRepository
+}
+
+const makeSut = (): SutTypes => {
+  const getClientByEmailRepositoryStub = makeGetClientByEmailRepositoryStub()
+  const sut = new CreateClientUseCase(getClientByEmailRepositoryStub)
+  return {
+    sut,
+    getClientByEmailRepositoryStub
+  }
+}
+
 describe('CreateClientUseCase', () => {
   it('Should call GetClientByEmailRepository with correct param', async () => {
-    class GetClientByEmailRepositoryStub implements GetClientByEmailRepository {
-      async getByEmail(
-        _email: string
-      ): Promise<GetClientByEmailRepository.Result> {
-        return makeClientModel()
-      }
-    }
-    const getClientByEmailRepositoryStub = new GetClientByEmailRepositoryStub()
-    const sut = new CreateClientUseCase(getClientByEmailRepositoryStub)
+    const { sut, getClientByEmailRepositoryStub } = makeSut()
     const getClientByEmailSpy = vi.spyOn(
       getClientByEmailRepositoryStub,
       'getByEmail'
