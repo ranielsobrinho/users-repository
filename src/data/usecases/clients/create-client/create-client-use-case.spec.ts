@@ -115,4 +115,19 @@ describe('CreateClientUseCase', () => {
     expect(createClientSpy).toHaveBeenCalledOnce()
     expect(createClientSpy).toHaveBeenCalledWith(makeCreateClientRequest())
   })
+
+  it('Should throw if CreateClientRepository throws', async () => {
+    const { sut, getClientByEmailRepositoryStub, createClientRepositoryStub } =
+      makeSut()
+    vi.spyOn(
+      getClientByEmailRepositoryStub,
+      'getByEmail'
+    ).mockResolvedValueOnce(null)
+
+    vi.spyOn(createClientRepositoryStub, 'createClient').mockRejectedValueOnce(
+      new Error()
+    )
+    const promise = sut.execute(makeCreateClientRequest())
+    await expect(promise).rejects.toThrow(new Error())
+  })
 })
