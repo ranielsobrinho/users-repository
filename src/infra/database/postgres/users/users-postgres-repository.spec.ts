@@ -1,118 +1,258 @@
-import { describe, expect, it } from 'vitest'
-import { InMemoryUsersRepository } from '../../in-memory-database/users-repository'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
+import DatabaseHelper from '../helpers/postgres-helper'
+import { UsersRepository } from './users-postgres-repository' // Adjust the import path to match your project structure
 
-const makeCreateUserRequest = () => ({
-  name: 'any_name',
-  email: 'any_email',
-  phone: 'any_phone'
-})
-
-const makeUpdateUserRequest = () => ({
-  name: 'other_name',
-  email: 'other_email',
-  phone: 'other_phone'
-})
-
-const makeCreatedUser = () => ({
-  id: '1',
-  name: 'any_name',
-  email: 'any_email',
-  phone: 'any_phone'
-})
-
-const makeUpdatedUser = () => ({
-  id: '1',
-  name: 'other_name',
-  email: 'other_email',
-  phone: 'other_phone'
-})
-const makeSut = () => {
-  return new InMemoryUsersRepository()
-}
+vi.mock('node:crypto', () => ({
+  randomUUID: vi.fn(() => 'fixed-uuid-for-testing')
+}))
 
 describe('UsersRepository', () => {
-  describe('getByEmail', () => {
-    it('Should return null if email is not taken', async () => {
-      const sut = makeSut()
-      const user = await sut.getByEmail('any_email')
-      expect(user).toBeNull()
-    })
+  let sut: UsersRepository
+  let mockClient: {
+    query: ReturnType<typeof vi.fn>
+  }
 
-    it('Should return user if email is taken', async () => {
-      const sut = makeSut()
-      await sut.createUser(makeCreateUserRequest())
-      const user = await sut.getByEmail('any_email')
-      expect(user).toEqual(makeCreatedUser())
-    })
+  beforeEach(() => {
+    mockClient = {
+      query: vi.fn()
+    }
+    vi.spyOn(DatabaseHelper, 'getClient').mockResolvedValue(mockClient as any)
+    sut = new UsersRepository()
   })
 
   describe('createUser', () => {
-    it('Should return null if email already exists', async () => {
-      const sut = makeSut()
-      await sut.createUser(makeCreateUserRequest())
-      const userCreated = await sut.createUser(makeCreateUserRequest())
-      expect(userCreated).toBeNull()
+    it('should insert a new user and return the created user', async () => {
+      const params = {
+        name: 'test_name',
+        email: 'test_email@example.com',
+        phone: '1234567890',
+        password: 'test_password'
+      }
+      const expectedResult = {
+        id: 'fixed-uuid-for-testing',
+        name: params.name,
+        email: params.email,
+        phone: params.phone,
+        password: params.password
+      }
+      mockClient.query.mockResolvedValueOnce({ rows: [expectedResult] })
+
+      const result = await sut.createUser(params)
+
+      expect(result).toEqual(expectedResult)
+      expect(mockClient.query).toHaveBeenCalledWith(
+        'INSERT INTO users(id, name, email, phone, password) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [
+          'fixed-uuid-for-testing',
+          params.name,
+          params.email,
+          params.phone,
+          params.password
+        ]
+      )
     })
 
-    it('Should return user created if email does not exists', async () => {
-      const sut = makeSut()
-      const userCreated = await sut.createUser(makeCreateUserRequest())
-      expect(userCreated).toEqual(makeCreatedUser())
+    it('should return null if the insert query returns no rows', async () => {
+      const params = {
+        name: 'test_name',
+        email: 'test_email@example.com',
+        phone: '1234567890',
+        password: 'test_password'
+      }
+      mockClient.query.mockResolvedValueOnce({ rows: [] })
+
+      const result = await sut.createUser(params)
+
+      expect(result).toBeNull()
+    })
+  })
+
+  describe('getByEmail', () => {
+    it('should return the user if found by email', async () => {
+      const email = 'test_email@example.com'
+      const expectedResult = {
+        id: 'fixed-uuid-for-testing',
+        name: 'test_name',
+        email,
+        phone: '1234567890',
+        password: 'test_password'
+      }
+      mockClient.query.mockResolvedValueOnce({ rows: [expectedResult] })
+
+      const result = await sut.getByEmail(email)
+
+      expect(result).toEqual(expectedResult)
+      expect(mockClient.query).toHaveBeenCalledWith(
+        'SELECT id, name, email, phone, password FROM users WHERE email = $1',
+        [email]
+      )
+    })
+
+    it('should return null if no user is found by email', async () => {
+      const email = 'nonexistent_email@example.com'
+      mockClient.query.mockResolvedValueOnce({ rows: [] })
+
+      const result = await sut.getByEmail(email)
+
+      expect(result).toBeNull()
+      expect(mockClient.query).toHaveBeenCalledWith(
+        'SELECT id, name, email, phone, password FROM users WHERE email = $1',
+        [email]
+      )
     })
   })
 
   describe('listAll', () => {
-    it('Should return all users', async () => {
-      const sut = makeSut()
-      await sut.createUser(makeCreateUserRequest())
-      const users = await sut.listAll()
-      expect(users[0].id).toBeTruthy()
-      expect(users[0].name).toEqual('any_name')
-      expect(users[0].email).toEqual('any_email')
-      expect(users[0].phone).toEqual('any_phone')
-      expect(users.length).toBe(1)
+    it('should return all users without passwords', async () => {
+      const expectedResult = [
+        {
+          id: 'uuid1',
+          name: 'user1',
+          email: 'user1@example.com',
+          phone: '1234567890',
+          created_at: new Date()
+        },
+        {
+          id: 'uuid2',
+          name: 'user2',
+          email: 'user2@example.com',
+          phone: '0987654321',
+          created_at: new Date()
+        }
+      ]
+      mockClient.query.mockResolvedValueOnce({ rows: expectedResult })
+
+      const result = await sut.listAll()
+
+      expect(result).toEqual(expectedResult)
+      expect(mockClient.query).toHaveBeenCalledWith(
+        'SELECT id, name, email, phone, created_at FROM users'
+      )
+    })
+
+    it('should return an empty array if no users exist', async () => {
+      mockClient.query.mockResolvedValueOnce({ rows: [] })
+
+      const result = await sut.listAll()
+
+      expect(result).toEqual([])
+      expect(mockClient.query).toHaveBeenCalledWith(
+        'SELECT id, name, email, phone, created_at FROM users'
+      )
     })
   })
 
   describe('getById', () => {
-    it('Should return null if user does not exists', async () => {
-      const sut = makeSut()
-      const userData = await sut.getById('any_id')
-      expect(userData).toBeNull()
+    it('should return the user by ID without password', async () => {
+      const userId = 'fixed-uuid-for-testing'
+      const expectedResult = {
+        id: userId,
+        name: 'test_name',
+        email: 'test_email@example.com',
+        phone: '1234567890',
+        created_at: new Date()
+      }
+      mockClient.query.mockResolvedValueOnce({ rows: [expectedResult] })
+
+      const result = await sut.getById(userId)
+
+      expect(result).toEqual(expectedResult)
+      expect(mockClient.query).toHaveBeenCalledWith(
+        'SELECT id, name, email, phone, created_at FROM users WHERE users.id = $1',
+        [userId]
+      )
     })
 
-    it('Should return user data on success', async () => {
-      const sut = makeSut()
-      await sut.createUser(makeCreateUserRequest())
-      const userData = await sut.getById('1')
-      expect(userData).toEqual(makeCreatedUser())
+    it('should return null if no user is found by ID', async () => {
+      const userId = 'nonexistent-uuid'
+      mockClient.query.mockResolvedValueOnce({ rows: [] })
+
+      const result = await sut.getById(userId)
+
+      expect(result).toBeNull()
+      expect(mockClient.query).toHaveBeenCalledWith(
+        'SELECT id, name, email, phone, created_at FROM users WHERE users.id = $1',
+        [userId]
+      )
     })
   })
 
   describe('deleteById', () => {
-    it('Should delete user by id', async () => {
-      const sut = makeSut()
-      await sut.createUser(makeCreateUserRequest())
-      const users = await sut.listAll()
-      expect(users.length).toBe(1)
-      const deletedUser = await sut.deleteById('1')
-      const usersDelete = await sut.listAll()
-      expect(deletedUser).toEqual(makeCreatedUser())
-      expect(usersDelete.length).toBe(0)
+    it('should delete the user by ID and return the deleted row (if any)', async () => {
+      const userId = 'fixed-uuid-for-testing'
+      const expectedResult = {
+        id: userId,
+        name: 'test_name',
+        email: 'test_email@example.com',
+        phone: '1234567890'
+      }
+      mockClient.query.mockResolvedValueOnce({ rows: [expectedResult] })
+
+      const result = await sut.deleteById(userId)
+
+      expect(result).toEqual(expectedResult)
+      expect(mockClient.query).toHaveBeenCalledWith(
+        'DELETE FROM users WHERE users.id = $1',
+        [userId]
+      )
+    })
+
+    it('should return undefined if no row is deleted (Postgres DELETE returns rowCount, but code assumes rows[0])', async () => {
+      const userId = 'nonexistent-uuid'
+      mockClient.query.mockResolvedValueOnce({ rows: [] }) // Simulate no deletion
+
+      const result = await sut.deleteById(userId)
+
+      expect(result).toBeUndefined() // Based on code: result.rows[0] would be undefined if empty
+      expect(mockClient.query).toHaveBeenCalledWith(
+        'DELETE FROM users WHERE users.id = $1',
+        [userId]
+      )
     })
   })
 
   describe('update', () => {
-    it('Should update user by id', async () => {
-      const sut = makeSut()
-      const users = await sut.listAll()
-      await sut.createUser(makeCreateUserRequest())
-      await sut.update('1', makeUpdateUserRequest())
-      expect(users[0].id).toBeTruthy()
-      expect(users[0].name).toEqual('other_name')
-      expect(users[0].email).toEqual('other_email')
-      expect(users[0].phone).toEqual('other_phone')
-      expect(users.length).toBe(1)
+    it('should update the user by ID and return the updated user', async () => {
+      const userId = 'fixed-uuid-for-testing'
+      const updateData = {
+        name: 'updated_name',
+        email: 'updated_email@example.com',
+        phone: 'updated_phone'
+      }
+      const expectedResult = {
+        id: userId,
+        name: updateData.name,
+        email: updateData.email,
+        phone: updateData.phone,
+        created_at: new Date()
+      }
+      mockClient.query.mockResolvedValueOnce({ rows: [expectedResult] })
+
+      const result = await sut.update(userId, updateData)
+
+      expect(result).toEqual(expectedResult)
+      expect(mockClient.query).toHaveBeenCalledWith(
+        'UPDATE users SET name = $1, email = $2, phone = $3 WHERE id = $4 RETURNING id, name, email, phone, created_at',
+        [updateData.name, updateData.email, updateData.phone, userId]
+      )
+    })
+
+    it('should return undefined if no user is updated (e.g., ID not found)', async () => {
+      const userId = 'nonexistent-uuid'
+      const updateData = {
+        name: 'updated_name',
+        email: 'updated_email@example.com',
+        phone: 'updated_phone'
+      }
+      mockClient.query.mockResolvedValueOnce({ rows: [] })
+
+      const result = await sut.update(userId, updateData)
+
+      expect(result).toBeUndefined() // Based on code: result.rows[0] if empty
+      expect(mockClient.query).toHaveBeenCalledWith(
+        'UPDATE users SET name = $1, email = $2, phone = $3 WHERE id = $4 RETURNING id, name, email, phone, created_at',
+        [updateData.name, updateData.email, updateData.phone, userId]
+      )
     })
   })
 })
