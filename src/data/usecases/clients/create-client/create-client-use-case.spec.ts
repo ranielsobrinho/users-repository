@@ -139,6 +139,22 @@ describe('CreateClientUseCase', () => {
     await expect(promise).rejects.toThrow(new Error())
   })
 
+  it('Should return left error if CreateClientRepository returns null', async () => {
+    const { sut, createClientRepositoryStub, getClientByEmailRepositoryStub } =
+      makeSut()
+    vi.spyOn(
+      getClientByEmailRepositoryStub,
+      'getByEmail'
+    ).mockResolvedValueOnce(null)
+    vi.spyOn(createClientRepositoryStub, 'createClient').mockResolvedValueOnce(
+      null
+    )
+    const client = await sut.execute(makeCreateClientRequest())
+    expect(client).toEqual(
+      left(new EmailAlreadyInUseError(makeCreateClientRequest().email))
+    )
+  })
+
   it('Should return created client on success', async () => {
     const { sut, getClientByEmailRepositoryStub } = makeSut()
     vi.spyOn(
