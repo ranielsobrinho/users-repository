@@ -45,5 +45,18 @@ describe('ClientsRepository', () => {
         ['fixed-uuid-for-testing', params.name, params.email, params.phone]
       )
     })
+
+    it('should return null if the insert query returns no rows', async () => {
+      const params = {
+        name: 'any_name',
+        email: 'any_email@mail.com',
+        phone: '1234567890'
+      }
+      mockClient.query.mockResolvedValueOnce({ rows: [] })
+
+      const result = await sut.createClient(params)
+
+      expect(result).toBeNull()
+    })
   })
 })
