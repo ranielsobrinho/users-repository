@@ -21,17 +21,32 @@ const makeCreateClientRequest = (): HttpRequest => ({
     phone: '1234567890'
   }
 })
+
+const makeCreateClientUseCaseStub = (): CreateClient => {
+  class CreateClientUseCaseStub implements CreateClient {
+    async execute(
+      _params: CreateClient.Params
+    ): Promise<Either<Error, ClientModel>> {
+      return right(makeCreateClientResult())
+    }
+  }
+  return new CreateClientUseCaseStub()
+}
+
+type SutTypes = {
+  sut: CreateClientController
+  createClientUseCaseStub: CreateClient
+}
+
+const makeSut = (): SutTypes => {
+  const createClientUseCaseStub = makeCreateClientUseCaseStub()
+  const sut = new CreateClientController(createClientUseCaseStub)
+  return { sut, createClientUseCaseStub }
+}
+
 describe('CreateClientController', () => {
   it('should call CreateClientUseCase with correct params', async () => {
-    class CreateClientUseCaseStub implements CreateClient {
-      async execute(
-        _params: CreateClient.Params
-      ): Promise<Either<Error, ClientModel>> {
-        return right(makeCreateClientResult())
-      }
-    }
-    const createClientUseCaseStub = new CreateClientUseCaseStub()
-    const sut = new CreateClientController(createClientUseCaseStub)
+    const { sut, createClientUseCaseStub } = makeSut()
     const createClientSpy = vi.spyOn(createClientUseCaseStub, 'execute')
     await sut.handle(makeCreateClientRequest())
     expect(createClientSpy).toHaveBeenCalledOnce()
