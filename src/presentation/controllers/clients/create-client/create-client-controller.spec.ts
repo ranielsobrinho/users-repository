@@ -85,4 +85,10 @@ describe('CreateClientController', () => {
       )
     )
   })
+
+  it('Should return 200 on success', async () => {
+    const { sut } = makeSut()
+    const httpResponse = await sut.handle(makeCreateClientRequest())
+    expect(httpResponse).toEqual(ok(makeCreateClientResult()))
+  })
 })
