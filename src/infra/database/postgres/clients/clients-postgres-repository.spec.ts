@@ -59,4 +59,39 @@ describe('ClientsRepository', () => {
       expect(result).toBeNull()
     })
   })
+
+  describe('getByEmail', () => {
+    it('should return the user if found by email', async () => {
+      const email = 'test_email@example.com'
+      const expectedResult = {
+        id: 'fixed-uuid-for-testing',
+        name: 'test_name',
+        email,
+        phone: '1234567890',
+        password: 'test_password'
+      }
+      mockClient.query.mockResolvedValueOnce({ rows: [expectedResult] })
+
+      const result = await sut.getByEmail(email)
+
+      expect(result).toEqual(expectedResult)
+      expect(mockClient.query).toHaveBeenCalledWith(
+        'SELECT id, name, email, phone FROM clients WHERE email = $1',
+        [email]
+      )
+    })
+
+    it('should return null if no user is found by email', async () => {
+      const email = 'nonexistent_email@example.com'
+      mockClient.query.mockResolvedValueOnce({ rows: [] })
+
+      const result = await sut.getByEmail(email)
+
+      expect(result).toBeNull()
+      expect(mockClient.query).toHaveBeenCalledWith(
+        'SELECT id, name, email, phone FROM clients WHERE email = $1',
+        [email]
+      )
+    })
+  })
 })
