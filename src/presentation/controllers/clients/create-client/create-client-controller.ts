@@ -2,7 +2,8 @@ import { CreateClient } from '@/domain/usecases/clients/create-client'
 import {
   badRequest,
   noContent,
-  serverError
+  serverError,
+  ok
 } from '@/presentation/helpers/http-helper'
 import { Controller, HttpRequest, HttpResponse } from '@/presentation/protocols'
 
@@ -20,6 +21,8 @@ export class CreateClientController implements Controller {
       if (response.isLeft()) {
         return badRequest(response.value)
       }
+
+      return ok(response.value)
       return noContent()
     } catch (error) {
       return serverError(error)
