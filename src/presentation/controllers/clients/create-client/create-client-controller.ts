@@ -1,5 +1,9 @@
 import { CreateClient } from '@/domain/usecases/clients/create-client'
-import { noContent, serverError } from '@/presentation/helpers/http-helper'
+import {
+  badRequest,
+  noContent,
+  serverError
+} from '@/presentation/helpers/http-helper'
 import { Controller, HttpRequest, HttpResponse } from '@/presentation/protocols'
 
 export class CreateClientController implements Controller {
@@ -8,7 +12,14 @@ export class CreateClientController implements Controller {
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
       const { name, email, phone } = httpRequest.body
-      await this.createClientUseCase.execute({ name, email, phone })
+      const response = await this.createClientUseCase.execute({
+        name,
+        email,
+        phone
+      })
+      if (response.isLeft()) {
+        return badRequest(response.value)
+      }
       return noContent()
     } catch (error) {
       return serverError(error)
