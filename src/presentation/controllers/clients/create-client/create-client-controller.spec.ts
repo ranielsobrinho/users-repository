@@ -56,4 +56,13 @@ describe('CreateClientController', () => {
       phone: '1234567890'
     })
   })
+
+  it('Should return 500 if CreateUser throws', async () => {
+    const { sut, createClientUseCaseStub } = makeSut()
+    vi.spyOn(createClientUseCaseStub, 'execute').mockRejectedValueOnce(
+      new Error()
+    )
+    const httpResponse = await sut.handle(makeCreateClientRequest())
+    expect(httpResponse).toEqual(serverError(new Error()))
+  })
 })
